@@ -1,0 +1,801 @@
+#include "stdio.h"
+#include "string.h"
+#include "stdlib.h"
+
+
+typedef int bool;
+#define MAX_POLYNOME 100 /*×î¶àÄÜŽæŽ¢100žö¶àÏîÊœ*/
+#define MAX_TERM 1000 /*Ã¿žö¶àÏîÊœ×î¶àÓÐ1000Ïî*/
+#define esp 1e-6
+#define false 0
+#define true 1
+
+
+/*¶àÏîÊœ:a0 + a1*x^1 + a2*x^2 + a3*x^3 + ... + an*x^n*/
+int a[MAX_POLYNOME][MAX_TERM];/*ÏµÊýÊý×é,ÓÃÀŽŽ¢ŽæÏµÊý*/
+int x[MAX_POLYNOME][MAX_TERM];/*œ×ÊýÊý×é,ÓÃÀŽŽ¢Žæœ×Êý*/
+int num=0;
+
+/*ÇóÃÝŽÎ·œ*/
+double pow(double x,int n);
+/*³õÊŒ»¯œçÃæ*/
+void initialization();
+/*Ñ­»·¶ÁÈë²¢žñÊœ»¯poly×Ö·ûŽ®*/
+bool format();
+/*ŒÓ·šÔËËã*/
+void addition();
+/*Œõ·šÔËËã*/
+void subtraction();
+/*³Ë·šÔËËã*/
+void multiplication();
+/*³ý·šÔËËã*/
+void divsion(double quotient_a[],int quotient_x[],bool is_output);
+/*Î¢·ÖÔËËã*/
+void differentiate();
+/*¹ÀËã*/
+double evaluation(double value);
+/*ÒòÊœ·Öœâ*/
+void factorisation();
+/*ÍË³ö³ÌÐò*/
+void quit();
+
+/*#define test*/
+int main(){
+#ifdef test
+	freopen("data.txt","r",stdin);
+#endif
+	/*œçÃæ*/
+    initialization();
+    while(1){
+        memset(a,0,sizeof(a));/*ÔÚœøÐÐÈÎºÎ²Ù×÷Ç°£¬¶Œ³õÊŒ»¯ÏµÊýÊý×é*/
+        memset(x,0,sizeof(x));/*ÔÚœøÐÐÈÎºÎ²Ù×÷Ç°£¬¶Œ³õÊŒ»¯œ×ÊýÊý×é*/
+        
+        printf(">");
+        /*ÊäÈëÒªœøÐÐµÄ²Ù×÷  */
+        char operation;
+        if(scanf("%c",&operation));
+        getchar();
+/*        cout << "input:" << operation << endl;*/
+        switch(operation){
+            case '+':/*¶àžöÏàŒÓ*/
+		        printf("You can input at most 100 polynomes ending with 'EOF'\n");
+				printf("Please input polynomes pressing Enter-key after each one:\n");
+	   			num=0;/*œ«¶àÏîÊœµÄžöÊý³õÊŒ»¯Îª0£»*/
+                int i;
+				for(i=0;i<100;i++){/*Ñ­»·¶ÁÈë¶àžöpoly*/
+					if(format()==false) break;/*Èç¹ûÓÃÀŽ¶ÁÈë×Ö·ûŽ®µÄº¯Êý·µ»ØµÄÊÇfalse,œáÊøÊäÈë*/
+				}
+		        addition();break;
+            
+            case '-':/*ÁœžöÏàŒõ*/
+            	printf("You can input at most 2 polynomes\n");
+				printf("Please input polynomes pressing Enter-key after each one:\n");
+		   		num=0;/*œ«¶àÏîÊœµÄžöÊý³õÊŒ»¯Îª0£»*/
+				for(i=0;i<2;i++){/*Ñ­»·¶ÁÈë2žöpoly*/
+					if(format()==false) break;/*Èç¹ûÓÃÀŽ¶ÁÈë×Ö·ûŽ®µÄº¯Êý·µ»ØµÄÊÇfalse,œáÊøÊäÈë*/
+				} 
+            	subtraction();break;
+            	
+            case '*':/*¶àžöÏà³Ë*/
+            	printf("You can input at most 100 polynomes ending with 'EOF'\n");
+				printf("Please input polynomes pressing Enter-key after each one:\n");
+	   			num=0;/*œ«¶àÏîÊœµÄžöÊý³õÊŒ»¯Îª0£»*/
+				for(i=0;i<100;i++){/*Ñ­»·¶ÁÈë¶àžöpoly*/
+					if(format()==false) break;/*Èç¹ûÓÃÀŽ¶ÁÈë×Ö·ûŽ®µÄº¯Êý·µ»ØµÄÊÇfalse,œáÊøÊäÈë*/
+				}
+            	multiplication();break;
+            case '/':
+            	printf("You can input at most 2 polynomes\n");
+				printf("Please input polynomes pressing Enter-key after each one:\n");
+		   		num=0;/*œ«¶àÏîÊœµÄžöÊý³õÊŒ»¯Îª0£»*/
+				for(i=0;i<2;i++){/*Ñ­»·¶ÁÈë2žöpoly*/
+					if(format()==false) break;/*Èç¹ûÓÃÀŽ¶ÁÈë×Ö·ûŽ®µÄº¯Êý·µ»ØµÄÊÇfalse,œáÊøÊäÈë*/
+				}
+				double quotient_a[MAX_TERM];
+				int quotient_x[MAX_TERM];
+            	divsion(quotient_a,quotient_x,true);break;
+                      
+            case 'd':/*µ¥žö¹ÀÖµÔËËã*/
+            	printf("You can input at most 1 polynomes\n");
+				printf("Please input polynomes pressing Enter-key after each one:\n");
+		   		num=0;/*œ«¶àÏîÊœµÄžöÊý³õÊŒ»¯Îª0£»*/
+				for(i=0;i<1;i++){/*Ñ­»·¶ÁÈë1žöpoly*/
+					if(format()==false) break;/*Èç¹ûÓÃÀŽ¶ÁÈë×Ö·ûŽ®µÄº¯Êý·µ»ØµÄÊÇfalse,œáÊøÊäÈë*/
+				}
+            	differentiate();break;
+            	
+            case 'e':          	
+            	printf("You can input at most 1 polynomes\n");
+				printf("Please input polynomes pressing Enter-key after it:\n");
+		   		num=0;/*œ«¶àÏîÊœµÄžöÊý³õÊŒ»¯Îª0£»*/
+		   		
+				if(format()==false) break;/*Èç¹ûÓÃÀŽ¶ÁÈëÒ»žö×Ö·ûŽ®µÄº¯Êý·µ»ØµÄÊÇfalse,œáÊøÊäÈë*/
+				printf("Please input x=");
+				double value;
+				if(scanf("%lf",&value));
+				getchar();
+            	printf("The result is: %lf",evaluation(value));break; 	
+            	
+        	case 'f': 
+        	
+        		printf("You can input at most 1 polynomes\n");
+				printf("Please input polynomes pressing Enter-key after it:\n");
+		   		num=0;/*œ«¶àÏîÊœµÄžöÊý³õÊŒ»¯Îª0£»*/
+		   		
+		   		if(format()==false) break;/*Èç¹ûÓÃÀŽ¶ÁÈëÒ»žö×Ö·ûŽ®µÄº¯Êý·µ»ØµÄÊÇfalse,œáÊøÊäÈë*/
+            	factorisation();break;
+            case 'q': 
+            	quit();break;
+            default: break;
+        }
+        printf("\nPlease input the next operation(+,-,*,/,d,e,f,q):\n");
+    }
+    return 0;
+}
+
+double pow(double x,int n){
+	double sum=1;
+	int i=0;
+	for(i=0;i<n;i++){
+		sum*=x;
+	}
+	return sum;
+}
+
+void initialization(){
+    printf("----------");
+    printf("Welcome to RenJing's Polynome-Home");
+    printf("----------\n");
+    printf("\n");
+
+    printf("Here are some options for you:\n");
+    printf("\n");
+
+    printf("+   addition operation\n");
+    printf("-   subtraction operation\n");
+    printf("*   multiplication operation\n");
+    printf("/   divsion operation\n");
+    printf("d   differentiate operation\n");
+    printf("e   evaluation operation\n");
+    printf("f   factorisation operation\n");
+    printf("q   quit Polynome-Home\n");
+    printf("\n");
+    
+    printf("Please input corresponding operation(+,-,*,/,d,e,f,q),ending with pressing Enter-key:\n");
+}
+
+bool format(){
+
+    /*±Ÿ²¿·ÖÓÃÓÚ¶ÁÈëpoly£¬²¢Ô€ŽŠÀípoly×Ö·ûŽ®*/
+    char poly[MAX_POLYNOME*MAX_TERM];/*ÓÃÀŽÍêÕûŽ¢ŽæÊäÈëµÄ¶àÏîÊœ*/
+    memset(poly,0,sizeof(poly));/*Çå¿Õploy*/
+    poly[0]='+';/*ÔÚpoly[0]µÄÎ»ÖÃ·ÅÖÃ+£¬ÒÔ±ãÖ®ºóµÄŽŠÀí*/
+    int cnt=1;/*žñÊœ»¯poly×îºóÒ»žö×Ö·ûµÄÎ»ÖÃ*/
+    int flag=0;/*±êŒÇ¶Î*/
+    int i,j,k;/*Ñ­»·µÄÁÙÊ±Ë÷Òý*/
+    
+    while(1){/*Ñ­»·¶ÁÈë×Ö·ûŽ®²¢œøÐÔžñÊœ»¯*/
+        char ch;
+        if(scanf("%c",&ch));/*¶ÁÈëµ¥žö×Ö·ûch*/
+        if(ch=='X') ch='X';
+        if(ch=='e') ch='E';
+        if(ch=='o') ch='O';
+        if(ch=='f') ch='F';
+        if(ch=='\n'){/*Èç¹ûchÊÇ»Ø³µ×Ö·û£¬ÄÇÃŽœáÊøÊäÈë*/
+
+            if(poly[cnt-1]=='F'){
+                flag=1;
+            }
+
+            if(poly[cnt-1]=='x'){
+                poly[cnt++]='^';
+                poly[cnt++]='1';
+            }
+
+            if(flag==0){
+                poly[cnt++]='x';
+                poly[cnt++]='^';
+                poly[cnt++]='0';
+            }
+
+            poly[cnt]='\0';
+            cnt++;
+            break;
+        }
+
+        if(ch=='x'){
+            flag=1;
+        }
+        
+        if(ch==' ') continue;/*Èç¹ûchÊÇ¿Õ°×·û£¬ÄÇÃŽÌø¹ýŽŠÀí£¬²¢œøÐÐÏÂÒ»ŽÎÑ­»·*/
+
+        if((poly[cnt-1]=='+'&&ch=='-')||(poly[cnt-1]=='-'&&ch=='+')){/*³öÏÖ+-,-+,·Ö±ð±ä³É-,-*/
+            poly[cnt-1]='-';
+            continue;
+        }else if((poly[cnt-1]=='+'&&ch=='+')||(poly[cnt-1]=='-'&&ch=='-')){/*³öÏÖ++,--·Ö±ð±ä³É+,+*/
+            poly[cnt-1]='+';
+            continue;
+        }else if((poly[cnt-1]=='+'&&ch=='x')||(poly[cnt-1]=='-'&&ch=='x')){/*³öÏÖ+x,-x·Ö±ð±ä³É+1x,-1x*/
+            poly[cnt++]='1';
+            poly[cnt++]='x';
+            continue;
+        }else if((poly[cnt-1]=='x'&&ch=='+')||(poly[cnt-1]=='x'&&ch=='-')){/*³öÏÖx+,x-·Ö±ð±äÎªx^1+,x^1-*/
+        	flag=0;
+            poly[cnt++]='^';
+            poly[cnt++]='1';
+            poly[cnt++]=ch;
+            continue;       
+        }
+
+    
+        if((ch=='+'&&flag==0)||(ch=='-'&&flag==0)){
+            poly[cnt++]='x';
+            poly[cnt++]='^';
+            poly[cnt++]='0';
+            flag=0;
+        }
+        if(ch=='+'||ch=='-'){
+            flag=0;
+        }
+
+        poly[cnt++]=ch;
+    }
+    
+    if(strcmp("+EOF",poly)==0){/*ÊäÈëEOFÖ±œÓÍË³öº¯Êý£¬²¢·µ»Øfalse*/
+    	return false;
+    }else if(strcmp("+x^0",poly)==0){/*ÊäÈë »Ø³µ  Ö±œÓÍË³öº¯Êý£¬²¢·µ»Øtrue*/
+        return true;
+    }
+
+/*    puts(poly);*/
+
+    /*±Ÿ²¿·ÖœøÐÐÔÙŽŠÀí,œ«×Ö·ûŽ®poly·Öžô³É¶à¶Îstr£¬·Ö±ðœøÐÐŽŠÀí*/
+    int temp_a[MAX_TERM];/*ÏµÊýÁÙÊ±ŸØÕó*/
+    int temp_x[MAX_TERM];/*œ×ÊýÁÙÊ±ŸØÕó*/
+    memset(temp_a,0,sizeof(temp_a));
+    memset(temp_x,0,sizeof(temp_x));
+    int index=0;/*ŒÇÂŒÏîÊý*/
+    
+    
+    for(i=0;i<strlen(poly);i++){
+        char symbol;/*ÓÃÀŽŽæÖüÏµÊýµÄÕýžººÅ*/
+        char str[MAX_TERM];
+        memset(str,0,sizeof(str));
+        symbol=poly[i++];
+/*            cout << symbol << endl;        */
+
+        for(j=0;poly[i+j]!='-'&&poly[i+j]!='+'&&i+j<strlen(poly);j++);
+        strncpy(str,poly+i,j);
+        i=i+j-1;
+        
+/*        puts(str);*/
+
+        {/*ÓÃÀŽŽŠÀístr£¬·ÖžîÏµÊý£¬œ×Êý example: 199x^10*/
+            /*œ×Êý*/
+            int times=1;/*±¶Êý*/
+            for(k=strlen(str)-1;str[k]!='^';k--){
+                temp_x[index]+=(str[k]-'0')*times;
+                times*=10;
+            }
+
+            /*ÏµÊý*/
+            times=1;
+            for(k=k-2;k>=0;k--){
+                temp_a[index]+=(str[k]-'0')*times;
+                times*=10;
+            }
+            if(symbol=='-') temp_a[index]=-temp_a[index];/*Èç¹ûÏµÊý·ûºÅÊÇ-£¬ÄÇÃŽÈ¡·Ž*/
+
+            index++;
+        }
+    }
+    
+    
+    /*±Ÿ²¿·Öœ«temp_a,temp_x·Ö±ð×ªŽæµœa,xÊý×éÖÐ£¬²¢ÇÒºÏ²¢Í¬œ×Ïî£¬ŽÓÐ¡µœŽóÉýÃÝÅÅÁÐ*/
+    /*num±íÊŸµ±Ç°polyµÄ±êºÅ£¬³õÊŒ»¯ÊÇ0£»'*/
+    
+    for(i=0;temp_a[i]!=0;i++);
+    for(j=i;j>0;j--){/*œ«temp_a,temp_xÊý×éÕûÌåºóÒÆÒ»Î»*/
+        temp_a[j]=temp_a[j-1];
+        temp_x[j]=temp_x[j-1];
+    }
+    temp_a[0]=i;/*temp_a[0]£¬ŽæŽ¢¶àÏîÊœÏîÊý*/
+    temp_x[0]=i;/*Í¬ÉÏ*/
+
+    for(i=1;i<=temp_x[0];i++){/*œ×ÊýŽÓŽóµœÐ¡ÅÅÁÐ*/
+        for(j=i;j<=temp_x[0];j++){
+            if(temp_x[i]<temp_x[j]){
+                int t;
+                t=temp_x[i];
+                temp_x[i]=temp_x[j];
+                temp_x[j]=t;
+
+                t=temp_a[i];
+                temp_a[i]=temp_a[j];
+                temp_a[j]=t;
+
+            }
+        }
+    }
+
+/*        for(i=1;i<=temp_a[0];i++) cout << temp_x[i] << ' ';*/
+    a[num][1]=temp_a[1];
+    x[num][1]=temp_x[1];
+    for(i=2,j=1;i<=temp_x[0];i++){
+        if(temp_x[i]==x[num][j]){
+            a[num][j]+=temp_a[i];
+        }else{
+            j++;
+            a[num][j]=temp_a[i];
+            x[num][j]=temp_x[i];
+        }
+    }
+    a[num][0]=j;x[num][0]=j;
+/*    for(i=1;i<=a[num][0];i++) cout << a[num][i] << "x^" << x[num][i] << endl;*/
+
+    num++;/*¶àÏîÊœžöÊý+1£¬œøÐÐÏÂÒ»ŽÎÊäÈë*/
+    
+    return true;
+}
+
+
+void addition(){
+    
+    /*¿ªÊŒœøÐÐŒÓ·šÔËËã£¬ÀÛŒÓÏÂ±ê0->num-1µÄ¶àÏîÊœ,²¢œ«œá¹û·ÅµœresultÊý×éµ±ÖÐ*/
+    int i,j,k;
+    int temp[MAX_TERM];
+    int result_a[MAX_TERM];/*ŒÇÂŒÏµÊýœá¹û*/
+    int result_x[MAX_TERM];/*ŒÇÂŒœ×Êýœá¹û*/
+    memset(temp,0,sizeof(temp));
+    temp[0]=1;
+    for(i=0;i<num;i++){
+        for(j=1;j<=x[i][0];j++){
+            int flag=0;
+            for(k=1;k<=temp[0];k++){
+                if(x[i][j]==temp[k]){
+                    flag=1;
+                    break;
+                }
+            }
+            if(!flag){
+                temp[++temp[0]]=x[i][j];
+            }
+
+        }
+    }
+
+/*    sort(temp+1,temp+temp[0]+1);œ«œ×ÊýŽÓŽóµœÐ¡ÅÅÐò*/
+
+	for(i=1;i<=temp[0];i++){/*œ«œ×ÊýŽÓŽóµœÐ¡ÅÅÐò*/
+		for(j=1;j<=temp[0];j++){
+			if(temp[i]<temp[j]){
+				int t;
+				t=temp[i];
+				temp[i]=temp[j];
+				temp[j]=t;
+			}
+		}
+	}
+
+/*    for(i=0;i<=temp[0];i++) cout << temp[i] << ' ';*/
+/*    cout << endl;*/
+
+    result_a[0]=temp[0];result_x[0]=temp[0];
+    for(i=1;i<=temp[0];i++) result_x[i]=temp[i];
+    
+    for(i=1;i<=result_x[0];i++){
+        for(j=0;j<num;j++){
+            for(k=1;k<=x[j][0];k++){
+                if(x[j][k]==result_x[i]){
+                    result_a[i]+=a[j][k];
+                }
+            }
+        }
+
+    }
+    
+    printf("The result is:\n");
+    for(i=1;i<=result_x[0];i++){
+    	if(result_a[i]==0) continue;/*ÏµÊýÎª0,Ìø¹ý²»Êä³ö*/
+    	 printf("%dx^%d",result_a[i],result_x[i]);
+    	 if(result_a[i+1]>0){
+    	 	printf("+");
+    	 }
+    }
+    printf("\n");
+
+}
+
+void subtraction(){
+    int i;
+    /*µÚ¶þžö¶àÏîÊœÈ¡·Ž,µ÷ÓÃŒÓ·šÔËËãŒŽ¿É*/
+    for(i=1;i<=x[1][0];i++){
+    	a[1][i]=-a[1][i];
+    }
+    
+    addition();
+}
+
+void multiplication(){
+    int i,j,k;
+	int temp_a[MAX_TERM];/*ÁÙÊ±ÏµÊýŸØÕó*/
+	int temp_x[MAX_TERM];/*ÁÙÊ±œ×ÊýŸØÕó*/
+	int result_a[MAX_TERM];/*œá¹ûÏµÊýŸØÕó*/
+	int result_x[MAX_TERM];/*œá¹ûœ×ÊýŸØÕó*/
+	
+	memset(temp_a,0,sizeof(temp_a));
+	memset(temp_x,0,sizeof(temp_x));
+	temp_a[0]=1;
+	temp_x[0]=1;
+	
+	memset(result_a,0,sizeof(result_a));
+	memset(result_x,0,sizeof(result_x));
+	result_a[0]=1;result_a[1]=1;
+	result_x[0]=1;result_x[1]=0;
+	
+	for(i=0;i<num;i++){
+		int cnt=0;
+		for(j=1;j<=x[i][0];j++){
+			for(k=1;k<=result_x[0];k++){
+				cnt++;
+				temp_a[cnt]=a[i][j]*result_a[k];
+				temp_x[cnt]=x[i][j]+result_x[k];
+			}
+		}
+		
+		result_a[0]=cnt;
+		result_x[0]=cnt;
+		temp_a[0]=cnt;
+		temp_x[0]=cnt;
+		for(j=1;j<=cnt;j++){
+			result_a[j]=temp_a[j];
+			result_x[j]=temp_x[j];
+		}
+/*		cout << "cnt" << cnt << endl;*/
+	}
+	
+	/*œ×ÊýŽÓÐ¡µœŽóÅÅÁÐ*/
+	for(i=1;i<=temp_x[0];i++){
+/*		cout << temp_x[0] << endl;*/
+        for(j=i;j<=temp_x[0];j++){
+            if(temp_x[i]>temp_x[j]){
+                int t;
+                t=temp_x[i];
+                temp_x[i]=temp_x[j];
+                temp_x[j]=t;
+
+                t=temp_a[i];
+                temp_a[i]=temp_a[j];
+                temp_a[j]=t;
+
+            }
+        }
+    }
+
+/*        for(i=1;i<=temp_a[0];i++) cout << temp_x[i] << ' ';*/
+    result_a[1]=temp_a[1];
+    result_x[1]=temp_x[1];
+    
+    for(i=2,j=1;i<=temp_x[0];i++){
+        if(temp_x[i]==result_x[j]){
+            result_a[j]+=temp_a[i];
+        }else{
+            j++;
+            result_a[j]=temp_a[i];
+            result_x[j]=temp_x[i];
+        }
+    }
+    result_a[0]=j;
+    result_x[0]=j;
+    
+    printf("The result is:\n");
+    for(i=1;i<=result_x[0];i++){
+    	if(result_a[i]==0) continue;/*ÏµÊýÎª0,Ìø¹ý²»Êä³ö*/
+    	 printf("%dx^%d",result_a[i],result_x[i]);
+    	 if(result_a[i+1]>0){
+    	 	printf("+");
+    	 }
+    }
+    printf("\n");   
+}
+
+void divsion(double quotient_a[],int quotient_x[],bool is_output){/*is_outputÓÃÀŽ¿ØÖÆº¯ÊýÊÇ·ñÊä³öÉÌ£¬ÓàÊý*/
+    int i,j;
+	memset(quotient_a,0,sizeof(quotient_a[0]*MAX_TERM));
+	memset(quotient_x,0,sizeof(quotient_x[0]*MAX_TERM));
+
+	/*quotientÓÃÀŽŽæŽ¢ÉÌ*/
+	quotient_a[0]=0;
+	quotient_x[0]=0;
+	
+	/*dividendŽæŽ¢±»³ýÊý*/
+	int dividend_a[MAX_TERM];
+	int dividend_x[MAX_TERM];
+	memset(dividend_a,0,sizeof(dividend_a));
+	dividend_a[0]=a[0][0];
+	dividend_x[0]=x[0][0];
+	
+	
+	/*divisorŽæŽ¢³ýÊý*/
+	int divisor_a[MAX_TERM];
+	int divisor_x[MAX_TERM];
+	memset(dividend_a,0,sizeof(divisor_a));
+	divisor_a[0]=a[1][0];
+	divisor_x[0]=x[1][0];
+	
+	/*dividendœ×ÊýŽÓžßµœµÍ*/
+	for(i=1;i<=x[0][0];i++){
+		dividend_a[i]=a[0][i];
+		dividend_x[i]=x[0][i];
+		
+	}
+	
+/*	for(int i=1;i<=dividend_x[0];i++) cout << dividend_a[i] << "x^" << dividend_x[i] << ' ';*/
+/*	cout << endl;*/
+	
+	/*divisorœ×ÊýŽÓžßµœµÍ*/
+	for(i=1;i<=x[1][0];i++){
+		divisor_a[i]=a[1][i];
+		divisor_x[i]=x[1][i];
+	}
+	
+	memset(a,0,sizeof(a));
+	memset(x,0,sizeof(x));
+	
+	/*remainderŽæŽ¢ÓàÊý*/
+	double remainder_a[MAX_TERM];
+	memset(remainder_a,0,sizeof(remainder_a));
+	int remainder_x[MAX_TERM];
+	
+	/*ÓàÊý³õÊŒ»¯=±»³ýÊý*/
+	for(i=0;i<=dividend_x[0];i++){
+		remainder_a[i]=dividend_a[i];
+		remainder_x[i]=dividend_x[i];
+	}	
+	
+	/*tempÁÙÊ±±äÁ¿,ÓÃÀŽŽ¢ŽæÁÙÊ± ÉÌºÍ³ýÊý ³Ë»ý*/
+	double temp_a[MAX_TERM];
+	int temp_x[MAX_TERM];
+	temp_a[0]=1.0*divisor_a[0];
+	temp_x[0]=divisor_x[0];
+	
+	int flag=0;
+	while(1){	
+		if(remainder_x[1]==0||remainder_a[1]==0){/*Õû³ýÍ£Ö¹Ñ­»·*/
+			flag=1;
+			break;
+		}
+		if(remainder_x[1]<divisor_x[1]) break;/*Ã»Õû³ý£¬µ«ÊÇÓàÊý×îžßÏîÐ¡ÓÚ³ýÊý×îžßÏî£¬Í£Ö¹Ñ­»·*/
+		
+		quotient_x[0]++;quotient_a[0]++;
+		quotient_a[quotient_x[0]]=remainder_a[1]/divisor_a[1]*1.0;/*ÉÌµÄÏµÊý */
+		quotient_x[quotient_x[0]]=remainder_x[1]-divisor_x[1];/*ÉÌµÄœ×Êý*/
+		
+		/*ÓÃtempÀŽŽ¢Žæ*/
+		for(i=1;i<=divisor_x[0];i++){
+			temp_a[i]=quotient_a[quotient_x[0]]*divisor_a[i]*1.0;
+			temp_x[i]=quotient_x[quotient_x[0]]+divisor_x[i];
+		}
+		
+		/*remainder=remainder-temp³õ²œ²úÉúÐÂµÄremainder*/
+		for(i=1;i<=temp_x[0];i++){
+			int length=remainder_x[0];
+			int flag=0;/*ŒÇÂŒÊÇ·ñÓÐÍ¬ÀàÏî£¬ŒÙÉè²»ŽæÔÚflag=0*/
+			for(j=1;j<=length;j++){
+				if(temp_x[i]==remainder_x[j]){/*Èç¹ûµ±Ç°ÏîŽæÔÚÍ¬ÀàÏî*/
+					flag=1;
+					remainder_a[j]=remainder_a[j]-temp_a[i];/*ºÏ²¢Í¬ÀàÏîÏµÊý*/
+					break;/*ÖÕÖ¹ÄÚÑ­»·£¬Œì²éÏÂÒ»Ïî*/
+				}
+			}
+			if(!flag){/*µ±Ç°Ïî²»ŽæÔÚÍ¬ÀàÏî*/
+				length++;
+				remainder_a[length]=-temp_a[i];
+				remainder_x[length]=temp_x[i];
+				
+				remainder_a[0]++;
+				remainder_x[0]++;
+			}
+		}
+		
+		/*¶ÔÉÏÒ»²œ³õ²œ²úÉúµÄremainderÏû³ýÏµÊýÎª0µÄÏî*/
+		for(i=1;i<=remainder_x[0];){
+			if(remainder_a[i]!=0) i++;/*Èç¹ûµ±Ç°Î»²»µÈÓÚ0£¬i++Œì²éÏÂÒ»Î»*/
+			else{
+				for(j=i;j<remainder_x[0];j++){/*µÚiÎ»µÈÓÚ0£¬Êý×éµÚiÖ®ºóµÄËùÓÐÕûÌåÇ°ÒÆÒ»Î»*/
+					remainder_a[j]=remainder_a[j+1];
+					remainder_x[j]=remainder_x[j+1];
+				}
+				remainder_x[0]--;/*žüÐÂremainder³€¶È*/
+				remainder_a[0]--;
+			}
+		}
+		
+		/*¶ÔÉÏÒ»²œ²úÉúµÄremainderœøÐÐ£¬œ×ÊýŽÓŽóµœÐ¡*/
+		for(i=1;i<=remainder_x[0];i++){
+			for(j=i;j<=remainder_x[0];j++){
+				if(remainder_x[i]<remainder_x[j]){/*œ»»»Öµ*/
+					double t1;/*ÁÙÊ±±äÁ¿*/
+					t1=remainder_a[i];
+					remainder_a[i]=remainder_a[j];
+					remainder_a[j]=t1;
+					
+					int t2;
+					t2=remainder_x[i];
+					remainder_x[i]=remainder_x[j];
+					remainder_x[j]=t2;
+				}
+			}
+		}
+		
+	}
+	
+	if(is_output){/*²ÎÊýis_putout==true,ÄÇÃŽÖŽÐÐÊä³ö²Ù×÷*/
+		printf("The quotient is: ");
+		if(quotient_x[0]==0){
+			printf("0");
+		}else{
+			for(i=1;i<=quotient_x[0];i++){
+				printf("%lfx^%d",quotient_a[i],quotient_x[i]);
+				if(quotient_a[i+1]>0){
+					printf("+");
+				}
+			}
+		}
+		printf("\n");
+		printf("The divisor is: ");
+		if(remainder_x[0]==0){
+			printf("0");
+		}else{
+			for(i=1;i<=remainder_x[0];i++){
+				printf("%lfx^%d",remainder_a[i],remainder_x[i]);
+				if(remainder_a[i+1]>0&&i+1<=remainder_x[0]){
+					printf("+");
+				}
+			}
+		}
+		printf("\n");
+	}	
+
+}
+
+void differentiate(){
+    int i;
+	/*ÇóµŒ*/
+	for(i=1;i<=x[num-1][0];i++){
+		a[num-1][i]=a[num-1][i]*x[num-1][i];
+		x[num-1][i]--;
+	}
+	
+	/*Êä³öœá¹û*/
+	printf("The result is:\n");
+    for(i=1;i<=x[num-1][0];i++){
+    	if(x[num-1][i]<0) continue;  			
+		printf("%dx^%d",a[num-1][i],x[num-1][i]);
+		if(a[num-1][i+1]>0&&i+1<=x[num-1][0]){
+		 	printf("+");
+		}
+    }
+    printf("\n");
+}
+
+double evaluation(double value){
+	
+	/*œ«xž³Öµvalue£¬²¢œøÐÐÔËËã*/
+	double result=0;
+    int i;
+	for(i=1;i<=x[0][0];i++){
+		result+=1.0*a[0][i]*pow(value,x[0][i]);
+		
+	}
+	return result;
+	
+}
+
+void factorisation(){
+    int i,j;
+
+	/*±£Žæ·ÖœâÒòÊœÖ®ºóÊ£ÓàµÄ²¿·Ö*/
+	double quotient_a[MAX_TERM];/*œ×ÊýŽÓžßµœµÍ*/
+	int quotient_x[MAX_TERM];
+	
+	/*a[0],x[0]±£ŽæµÄÊÇÐèÒª·ÖœâµÄÒòÊœ,ŽÓžßµœµÍ*/
+	/*a[1],x[1]ÓÃÀŽ±£Žæµ±Ç°ÒªŽŠÀíÒòÊœ£¬ŽÓžßµœµÍ*/
+	/*temp[maxn][2]ÀŽ±£ŽæËùÓÐµÄÒòÊœ*/
+	int temp[MAX_TERM][2];
+	int cnt=0;/*ŒÇÂŒÒòÊœµÄÊýÁ¿*/
+	int flag=1;/*±êŒÇÊÇ·ñ·ÖœâÍêÈ«*/
+	while(flag){
+		flag=0;
+		
+		if(x[0][x[0][0]]>0){
+			a[1][0]=1;
+			a[1][1]=1;
+			x[1][0]=1;
+			x[1][1]=x[0][x[0][0]];
+			temp[cnt][0]=x[0][x[0][0]];
+			temp[cnt][1]=0;
+			cnt++;
+			divsion(quotient_a,quotient_x,false);
+			flag=1;
+		}else{
+			for(i=abs(a[0][1]);i>=-abs(a[0][1]);i--){
+				if(i!=0&&a[0][1]%i==0){
+					for(j=abs(a[0][x[0][0]]);j>=-abs(a[0][x[0][0]]);j--){
+						if(j!=0&&a[0][x[0][0]]%j==0){
+							double value=-j/i*1.0;
+/*							cout << i << j << endl;*/
+							if(abs(evaluation(value))<esp){
+								flag=1;
+								temp[cnt][0]=i;
+								temp[cnt][1]=j;
+								cnt++;
+								a[1][0]=2;x[1][0]=2;							
+								a[1][1]=i;x[1][1]=1;
+								a[1][2]=j;x[1][2]=0;
+								divsion(quotient_a,quotient_x,false);
+							}
+						}
+						if(flag) break;
+					}
+				}
+				if(flag) break;
+			}
+		}
+		
+		if(flag){
+			memset(a,0,sizeof(a));
+			memset(x,0,sizeof(x));
+			for(i=0;i<=quotient_x[0];i++){
+				a[0][i]=(int)quotient_a[i];
+				x[0][i]=quotient_x[i];
+			}
+		}	
+	}
+	
+	for(i=0;i<cnt;i++){
+		if(temp[i][1]==0){
+/*			cout << "(x^" << temp[i][0] << ")*";*/
+			printf("(x^%d)",temp[i][0]);
+		}else{
+/*			cout << "(" << temp[i][0] << "x";*/
+			printf("(%dx",temp[i][0]);
+			if(temp[i][1]>0){
+				printf("+");
+			}
+/*			cout << temp[i][1] << ")*";*/
+			printf("%d)*",temp[i][1]);
+		}
+	}
+	
+	if(a[0][0]>0){
+		printf("(");
+		for(i=1;i<=x[0][0];i++){			
+/*		cout << a[0][i] << "x^" << x[0][i];*/
+			printf("%dx^%d",a[0][i],x[0][i]);
+			if(a[0][i+1]>0&&i+1<=x[0][0]){
+			 	printf("+");
+			}
+		}
+		printf(")");
+	}
+	
+	printf("\n");
+}
+
+void quit(){
+    printf("Goodbye!\nYou have quit Polynome-Home!\n");
+    exit(0);
+} 
+
+
+
+
+
+
+
+
+
+
+
+

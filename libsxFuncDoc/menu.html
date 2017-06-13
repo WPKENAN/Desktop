@@ -1,0 +1,123 @@
+<title> Menus </title>
+
+<ul>
+ <li> <a href="#menu"> Menus </a>
+ <li> <a href="menu.html#fMM">   MakeMenu </a>
+ <li> <a href="menu.html#fMMI">  MakeMenuItem </a>
+ <li> <a href="menu.html#fSMIC"> SetMenuItemChecked </a>
+ <li> <a href="menu.html#fGMIC"> GetMenuItemChecked </a>
+</ul>
+<hr>
+<p>
+<h2> <a name="menu"> Menus </a> </h2>
+<p>
+Menus provide standard drop-down style menus that let the user select
+from a variety of choices.  The Athena widgets do not support cascaded
+menus, so a menu is only a single list of items.  A menu contains menu
+items that are tied to callback functions in the application.  Menu
+items must be text and can not be bitmaps.
+<hr>
+<p>
+<a name="fMM"> <b>
+Widget MakeMenu(char *name);
+</b> </a>
+<p>
+This function creates a menu button that contains the text pointed to
+by the character string name.  When the button is clicked, a menu pops
+up.  The menu contains items created with 
+<a href="menu.html#fMMI">         MakeMenuItem() </a>.
+<p>
+You need to save the return value of this function to be able to pass
+it to 
+<a href="menu.html#fMMI">         MakeMenuItem() </a> 
+so that menu items can be attached to a menu.
+<p>
+If this function fails, it returns NULL.
+<p>
+SEE ALSO: 
+<a href="menu.html#fMMI">         MakeMenuItem() </a>, 
+<a href="button.html#fMB">        MakeButton() </a>, 
+<a href="misc.html#fSWP">         SetWidgetPos() </a>
+<hr>
+<p>
+<a name="fMMI"> <b>
+Widget MakeMenuItem(Widget menu, char *name, ButtonCB func, void *arg);
+</b> </a>
+<p>
+This function adds a menu item to a menu.  The menu item contains the
+text pointed to by the string name.  Whenever the user selects this
+menu item, the callback function, func, is called.  The final argument
+is an arbitrary void pointer that is passed to the callback function.
+<p>
+The first argument must be a widget returned by 
+<a href="menu.html#fMM">          MakeMenu() </a> 
+(results are undefined if it is not).
+<p>
+If 
+<a href="menu.html#fMMI">         MakeMenuItem() </a> 
+fails for any reason, a NULL is returned.
+<p>
+The callback function for the menu item should be declared as follows: 
+<p>
+<pre>
+       void  func(Widget w, void *data)
+       {
+       }
+</pre>
+<p>
+Whenever the user selects this menu item, the callback will be called.
+<p>
+Setting of widget attributes with 
+<a href="misc.html#fSFC">         SetFgColor() </a>, 
+<a href="misc.html#fSBC">         SetBgColor() </a>, 
+etc work 
+normally except that only one background color may be specified and it
+takes effect for the entire menu.  You can set different fonts for
+each menu item.
+<p>
+NOTE: You do not need to call 
+<a href="misc.html#fSWP">         SetWidgetPos() </a> 
+for menu items.  Successive menu items are placed below previous menu items.
+<p>
+SEE ALSO: 
+<a href="menu.html#fSMIC">        SetMenuItemChecked() </a>, 
+<a href="menu.html#fGMIC">        GetMenuItemChecked() </a>, 
+<a href="menu.html#fMM">          MakeMenu() </a>.
+<hr>
+<p>
+<a name="fSMIC"> <b>
+void   SetMenuItemChecked(Widget w, int state);
+</b> </a>
+<p>
+This function sets the ``checked'' state of a menu item.  If a menu
+item is in the checked state, a bitmap of a check mark appears to the
+left of the menu item text.
+<p>
+The first argument, w, is a menu item widget created with
+<a href="menu.html#fMMI">         MakeMenuItem() </a>.  
+The second argument, state, is a boolean value of
+either TRUE (1) or FALSE (0) indicating whether or not the check mark
+should be drawn to the left of the menu item.  If the state argument
+is TRUE, the check mark is drawn.  If the state argument is FALSE, the
+check mark is removed.
+<p>
+SEE ALSO: 
+<a href="menu.html#fGMIC">        GetMenuItemChecked() </a>, 
+<a href="menu.html#fMMI">         MakeMenuItem() </a>
+<hr>
+<p>
+<a name="fGMIC"> <b>
+int    GetMenuItemChecked(Widget w);
+</b> </a>
+<p>
+This function returns a boolean result indicating whether the menu
+item referred to by the Widget w, is checked or not.
+<p>
+If the menu item referred to by `w' is checked, a value of TRUE (1) is
+returned.  If the menu item does not currently have a check mark next
+to it, a value of FALSE (0) is returned.
+<p>
+SEE ALSO: 
+<a href="menu.html#fSMIC">        SetMenuItemChecked() </a>, 
+<a href="menu.html#fMMI">         MakeMenuItem() </a>
+

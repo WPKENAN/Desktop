@@ -1,0 +1,170 @@
+<title> Popup Windows </title>
+
+<ul>
+ <li> <a href="#popup"> Popup Windows </a>
+ <li> <a href="popups.html#fGYN"> GetYesNo </a>
+ <li> <a href="popups.html#fGO">  GetOkay </a>
+ <li> <a href="popups.html#fGTRS">GetTriState </a>
+ <li> <a href="popups.html#fGS">  GetString </a>
+ <li> <a href="popups.html#fGLS">  GetLongString </a>
+ <li> <a href="popups.html#fGTXT">  GetText </a>
+ <li> <a href="popups.html#fGF">  GetFile </a>
+ <li> <a href="popups.html#fSFF"> SetFreqFilter </a>
+</ul>
+<hr>
+<p>
+<h2> <a name="popup"> Popup Windows </a> </h2>
+<p>
+Popup windows are simple dialog boxes that get a simple yes/no or
+string answer from the user.  When these windows popup, they block
+input to the previously active window.
+<hr>
+<p>
+<a name="fGYN"> <b>
+int GetYesNo(char *question);
+</b> </a>
+<p>
+This function allows you to prompt the user for the answer to a simple
+yes or no type of question.  It simply pops up a dialog box with the
+text contained in the string question, and two okay/cancel buttons.
+<p>
+If the user clicks Okay, this function returns TRUE.  If the user
+clicks Cancel, this function returns FALSE.  The text in the question
+string can have embedded newlines (\n characters) to break things up
+or to add spacing.
+<p>
+SEE ALSO : 
+<a href="popups.html#fGO">       GetOkay() </a>, 
+<a href="popups.html#fTRS">       GetTriState() </a>, 
+<a href="popups.html#fGS">        GetString() </a>,
+<a href="popups.html#fGTXT">      GetText() </a>
+<hr>
+<p>
+<a name="fGO"><b>
+int GetOkay(char *question);
+</b></a>
+<p>
+This function is mainly for short informational displays.  It pops up
+a dialog box with the text contained in the string question, and an
+okay button.
+<p>
+The text in the question string can have embedded newlines (\n
+characters) to break things up or to add spacing.
+<p>
+SEE ALSO : 
+<a href="popups.html#fGYN">       GetYesNo() </a>, 
+<a href="popups.html#fTRS">       GetTriState() </a>, 
+<a href="popups.html#fGS">        GetString() </a>,
+<a href="popups.html#fGTXT">      GetText() </a>
+<hr>
+<p>
+<a name="fGTRS"><b>
+int GetTriState(char *question);
+</b></a>
+<p>
+This function allows you to prompt the user for the answer to a simple
+yes or no type of question, and in addition, the user has a Cancel
+option.  The dialog box contains the string pointed to by the argument
+question and it also contains three buttons, Yes, No and Cancel. 
+<p>
+If the user clicks the Yes button, this function returns TRUE.  If the
+user clicks the No button, this function returns FALSE.  If the user
+clicks the Cancel button, a -1 is returned.  It is important to keep
+in mind that you can't just test for true/false as you can with
+<a href="popups.html#fGYN">       GetYesNo() </a> since a return of Cancel would test as true (since it is a
+non-zero value).
+<p>
+The text in the question string can have embedded newlines (\n
+characters) to break things up or to add spacing.
+<p>
+SEE ALSO : 
+<a href="popups.html#fGYN">       GetYesNo() </a>, 
+<a href="popups.html#fGO">        GetOkay() </a>, 
+<a href="popups.html#fGS">        GetString() </a>,
+<a href="popups.html#fGTXT">      GetText() </a>
+<hr>
+<p>
+<a name="fGS"><b>
+char *GetString(char *msg, char *default);
+</b> </a>
+<p>
+This function allows you to prompt the user for a string of input.
+The first argument, msg, is a pointer to a string which will be
+displayed in the dialog box.  The next argument, default, is the
+default string to place in the text string box (it can be NULL or ""). 
+<p>
+When you call this function, it pops up a small dialog box on the
+screen, and the user can enter the line of text.  When the user clicks
+ok or cancel, the function returns a pointer to the string of text the
+user entered.
+<p>
+The string that is returned to your application is dynamically
+allocated with malloc().  It is the application's responsibility to
+free it when it is done.
+<p>
+If the user clicks cancel, you get a NULL return value.
+<p>
+SEE ALSO : 
+<a href="popups.html#fGYN">       GetYesNo() </a>,
+<a href="popups.html#fGTXT">      GetText() </a>
+<hr>
+<p>
+<a name="fGLS"><b>
+char *GetLongString(char *msg, char *default, int width);
+</b> </a>
+<p>
+Similar to GetString(), with an additional argument controlling the
+width of the input box (in pixels).
+<p>
+SEE ALSO : 
+<a href="popups.html#fGS">        GetString() </a>,
+<a href="popups.html#fGTXT">      GetText() </a>
+<hr>
+<p>
+<a name="fGTXT"><b>
+char *GetText(char *msg, char *default, int width, int height);
+</b> </a>
+<p>
+Similar to GetString(), but the dialog box is replaced by
+an editable window of dimensions width x height, which scrolls
+in both vertical and horizontal directions.
+<p>
+SEE ALSO :
+<a href="popups.html#fGS">       GetString() </a>,
+<a href="popups.html#fGLS">      GetLongString() </a>
+<hr>
+<p>
+<a name="fGFILE"><b>
+char *GetFile(char info_label, char file_or_dir_name, FreqCB func, void *data)
+</b> </a>
+<p>
+This is the API call to the File Requestor, which allows you to
+browse files from a directory or filesystem. The initial directory is 
+set to be the directory file_or_dir_name -- or the directory containing
+that file if it is not a directory. The top information label is set
+to be info_label, usually some information to be passed to users.
+If the callback function (FreqCB) func is not NULL, a double click
+on an item in the scroll list allows 'func' to be executed without
+quitting the File Requestor. The syntax for the callback function is
+<pre>
+      void func(Widget w, char *dir_name, char *file_name, void *data)
+</pre>
+where dir_name and file_name are set to the values selected with the 
+File Requestor.
+<p>
+SEE ALSO: 
+<a href="popups.html#SFF">      SetFreqFilter()     </a>
+<hr>
+<p>
+<a name="fSFF"><b>
+void SetFreqFilter(char *filter)
+</b> </a>
+<p>
+Sets the "filter" to be used in the GetFile() procedure. The default
+filter is "*", which lets all files be listed in the file requestor. 
+If filter is set to "*.txt", then only files possessing a .txt suffix
+will be listed. An arbitrary number of wild card characters '*' can be
+used.  The length of filter cannot exceed 80 characters in total.
+<p>
+SEE ALSO: 
+<a href="popups.html#GFILE">      GetFile()     </a>

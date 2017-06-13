@@ -1,0 +1,234 @@
+#include<stdio.h>
+#include<malloc.h>
+#include<math.h>
+
+#define TRUE 1
+#define FALSE 0
+
+typedef struct mulpoly
+{
+	float coef;        //系数
+	int expn;        //指数
+	struct mulpoly *next;     //指针域
+}LNode,*LinkList;
+
+typedef   LinkList   polynomial;
+
+void PrintPoly(polynomial L)       //多项式的输出
+{
+	polynomial p;
+	int nCount = 0;
+	p = L;
+
+	while(1)
+	{
+        if((abs(p->coef)) > 1e-6)
+        {
+            printf("%f",p->coef);
+            if(p->expn == 1)
+            {
+                printf("X",p->expn);
+            }
+            else if(p->expn != 0)
+            {
+                printf("X^%d",p->expn);
+            }
+            nCount++;
+        }
+
+        if(p->next != NULL)
+        {
+            if(p->next->coef > 0)
+            {
+                printf("+");
+            }
+            p=p->next;
+        }
+        else
+        {
+            break;
+        }
+	}
+
+	if(nCount == 0)
+	{
+	    printf("0");
+	}
+    printf("\n\n");
+} //end PrintPoly
+
+
+polynomial SortPoly(polynomial &ha)
+{
+    polynomial hb;
+    polynomial t,r,s;
+    int  expn = -256;
+    int nCount = 0;
+
+    t = ha;
+    while(t != NULL)
+    {
+        if(t->expn > expn)
+        {
+            expn = t->expn;
+        }
+        t = t->next;
+    }
+    //printf("\nexpn = %d \n",expn);
+
+    hb = (polynomial)malloc(sizeof(LNode));
+    r = hb;
+
+    while(expn >= -256)
+    {
+        t = ha;
+        nCount = 0;
+        while(t != NULL)
+        {
+            if(expn == t->expn)
+            {
+                nCount += t->coef;
+            }
+            t = t->next;
+            //printf("\nnCount = %d \n",nCount);
+        }
+
+        if(nCount != 0)
+        {
+            s = r;
+            r ->coef = nCount;
+            r ->expn = expn;
+            r ->next = (polynomial)malloc(sizeof(LNode));
+            r = r->next;
+        }
+        expn--;
+    }
+    s ->next = NULL;
+    free(r);
+    return (hb);
+}
+
+void CreatPoly(LinkList &L)     //产生多项式链表
+{
+	polynomial r,s;
+	float m;
+	int n = 0;
+	char c = '0',flag = 0,array[1000];
+	L = (polynomial)malloc(sizeof(LNode));     //建立一个头结点
+	printf("  请按指数由大到小输入多项式,系数和指数间以逗号间隔：\n");
+	printf("  (系数,指数):");
+	scanf("%f,%d",&L->coef,&L->expn);
+	printf("\n");
+	r = L;
+	while(1)            //n不等于0时建立多项式链表
+	{
+        printf("  (系数,指数):");
+        scanf("%f,%d",&m,&n);
+        printf("\n");
+	    if((abs(m)) > 1e-6)
+	    {
+            s = (polynomial)malloc(sizeof(LNode));    //建立一个新结点
+            s->coef = m;
+            s->expn = n;
+            r->next = s;     //把s链接到r的后面
+            r = r->next;
+	    }
+	    else
+	    {
+            break;
+	    }
+	}
+	r->next = NULL;
+}
+
+
+
+polynomial AddPoly(polynomial &ha,polynomial &hb)      //两个多项式相加
+{
+    polynomial p,q,r,hc;
+
+    p = ha;
+    q = hb;
+
+    hc = (polynomial)malloc(sizeof(LNode));
+    r = hc;
+
+    while(p != NULL)
+    {
+        r->coef = p->coef;
+        r->expn = p->expn;
+        r->next = (polynomial)malloc(sizeof(LNode));
+        r = r->next;
+        p = p->next;
+    }
+
+    while(q != NULL)
+    {
+        r->coef = q->coef;
+        r->expn = q->expn;
+        r->next = (polynomial)malloc(sizeof(LNode));
+        r = r->next;
+        q = q->next;
+    }
+    r->next = NULL;
+	return (SortPoly(hc));
+} //end AddPoly
+
+polynomial DecPoly(polynomial &ha,polynomial &hb)      //两个多项式相减
+{
+    polynomial p,q,r,hc;
+
+    p = ha;
+    q = hb;
+
+    hc = (polynomial)malloc(sizeof(LNode));
+    r = hc;
+
+    while(p != NULL)
+    {
+        r->coef = p->coef;
+        r->expn = p->expn;
+        r->next = (polynomial)malloc(sizeof(LNode));
+        r = r->next;
+        p = p->next;
+    }
+
+    while(q != NULL)
+    {
+        r->coef = -q->coef;
+        r->expn = q->expn;
+        r->next = (polynomial)malloc(sizeof(LNode));
+        r = r->next;
+        q = q->next;
+    }
+    r->next = NULL;
+	return (SortPoly(hc));
+} //end DecPoly
+
+int main()            //主程序
+{
+	polynomial ha,hb,hc,hd;
+    char Flag = 0;
+
+    while(Flag != '\n')
+    {
+        printf("              本程序实现两个多项式A和B相乘。\n");
+        printf("下面请输入第一个多项式，以输入系数等于0并回车结束输入\n");
+        CreatPoly(ha);  printf("第一个多项式为：A=");
+        PrintPoly(ha);
+        printf("下面请输入第二个多项式，以输入系数等于0并回车结束输入\n");
+        CreatPoly(hb);  printf("第二个多项式为：B=");
+        PrintPoly(hb);
+        printf("多项式A和B相加所得的多项式C为：C=");
+        hc = AddPoly(ha,hb);
+        PrintPoly(hc);
+        printf("多项式A和B相减所得的多项式D为：D=");
+        hc = DecPoly(ha,hb);
+        PrintPoly(hc);
+
+        setbuf(stdin,NULL);
+        Flag = getchar();
+    }
+
+	return 0;
+}

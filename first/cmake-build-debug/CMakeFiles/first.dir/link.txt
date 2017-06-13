@@ -1,0 +1,1 @@
+/usr/bin/cc  -g   CMakeFiles/first.dir/main.c.o  -o first -rdynamic -lGL -lGLU -lglut 

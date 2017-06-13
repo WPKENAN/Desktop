@@ -1,0 +1,327 @@
+<title> Windows </title>
+
+<h2> Windows </h2>
+<p>
+This file contains descriptions of the main high level startup and
+window creation functions.
+<p>
+<ul>
+ <li> <a href="windows.html#fOD">  OpenDisplay </a>
+ <li> <a href="windows.html#fSD">  ShowDisplay </a>
+ <li> <a href="windows.html#fML">  MainLoop </a>
+ <li> <a href="windows.html#fSD2"> SyncDisplay </a>
+ <li> <a href="windows.html#fMW">  MakeWindow </a>
+ <li> <a href="windows.html#fSCW"> SetCurrentWindow </a>
+ <li> <a href="windows.html#fCW">  CloseWindow </a>
+ <li> <a href="windows.html#fGTW"> GetTopWidget </a>
+ <li> <a href="windows.html#fCP">  CloseProcedure </a>
+</ul>
+<hr>
+<p>
+<a name="fOD"> <b>
+int    OpenDisplay(int argc, char **argv);
+</b> </a>
+<p>
+This function initiates everything with libsx.  You should call this 
+function before you call any of the other functions.  A correctly
+written application will call OpenDisplay(), passing its command line
+arguments and count.  The return value from this function is the new
+number of arguments (or zero if an error occurred).  The X libraries
+accept various standard command line options such as -display or
+-font, and if your application passes the command line arguments to
+<a href="windows.html#fOD">       OpenDisplay() </a>), these will be handled properly.  Any X options are
+removed from the argv array, therefore it is best if you do your
+command line processing _after_ calling OpenDisplay(). In case you
+want to predefine some X options to be passed to OpenDisplay (without
+having to type them on the command line), e.g. -bg gray76 to define
+the background pixel, you can set the PredefArgs variable as follows:
+<pre>
+    static char *args[] = { "-bg", "gray76", NULL };
+
+    PredefArgs = args;
+    OpenDisplay(argc, argv);
+</pre>
+<p>
+You only need to call this function once to initialize the first
+window your program uses.  Any other windows you need should be
+created with 
+<a href="windows.html#fMW">       MakeWindow() </a>.
+<p>
+Technically, calling OpenDisplay() is optional (the MakeXXX() routines
+will call it for you if you didn't), but it's usually a good idea to
+call it (since it is only one line of code and it's pretty
+straightforward. 
+<p>
+This function returns FALSE (0) if something went wrong (like being
+unable to open the display, etc). If everything went ok, it returns
+the new number of arguments in argv.
+<p>
+SEE ALSO: 
+<a href="windows.html#fMW">       MakeWindow() </a>
+<hr>
+<p>
+<a name="fSD"> <b>
+void   ShowDisplay(void);
+</b> </a>
+<p>
+This function displays the currently active window (user interface)
+you've created with the MakeXXX() calls.  After this call completes,
+the interface will be visible on the display.
+<p>
+Until you call this function, your interface will not be visible and
+drawing into a draw area will have no effect.
+<p>
+Usually one calls 
+<a href="windows.html#fSD">       ShowDisplay() </a>, 
+allocates some colors and then
+immediately calls 
+<a href="windows.html#fML">       MainLoop() </a>.  
+If you do not call 
+<a href="windows.html#fSD">       ShowDisplay() </a>, 
+but just directly call 
+<a href="windows.html#fML">       MainLoop() </a>, then 
+<a href="windows.html#fML">       MainLoop() </a> 
+implicitly calls
+<a href="windows.html#fSD">       ShowDisplay() </a>.  
+<p>
+SEE ALSO: 
+<a href="windows.html#fML">       MainLoop() </a>, 
+<a href="windows.html#fMW">       MakeWindow() </a> 
+<hr>
+<p>
+<a name="fML"> <b>
+void   MainLoop(void);
+</b> </a>
+<p>
+After calling this function, your program yields control to the user
+interface, and it is entirely driven by what the user does and the
+callbacks associated with the various widgets.  For a single window
+application, the general flow of events is:
+<p>
+<pre>
+    OpenDisplay(argc, argv);   /* initialize the first window */
+
+    MakeButton(....);          /* create widgets */
+
+    ShowDisplay();             /* put the window on the screen */
+                               /* optionally allocate colors */
+    MainLoop();                /* start the main loop going */
+</pre>
+<p>
+When you call this after calling 
+<a href="windows.html#fSD">       ShowDisplay() </a> 
+for your first window
+(created by 
+<a href="windows.html#fOD">       OpenDisplay() </a>)),
+the 
+<a href="windows.html#fML">       MainLoop() </a> 
+function never returns and
+your application should have some callback function that will exit()
+the program (such as a quit button or menu option).
+<p>
+If you did not call 
+<a href="windows.html#fSD">       ShowDisplay() </a>, 
+ MainLoop() will call it for you and then launch into the main loop.
+<p>
+You should not call MainLoop() for NONEXCLUSIVE mode windows created
+with 
+<a href="windows.html#fMW">       MakeWindow() </a>.  
+Those type of windows have their callbacks handled
+by the MainLoop() function that is already executing (i.e. the one you
+called for your original window).
+<p>
+If the window is an EXCLUSIVE mode window, then MainLoop() keeps
+executing until 
+<a href="windows.html#fCW">       CloseWindow() </a> 
+is called on the EXCLUSIVE mode window.
+That is, 
+<a href="windows.html#fML">       MainLoop() </a> 
+blocks until the EXCLUSIVE mode window is closed,
+and then it returns.
+<p>
+If you create a non-exclusive mode window, the general order of events
+is:
+<p>
+<pre>
+      MakeWindow(NONEXCLUSIVE_WINDOW, ....);
+      MakeButton(...);
+      ShowDisplay();
+</pre>
+<p>
+This creates a window, puts interface objects into it, and then puts
+that window on the screen.  No other actions need to be taken, and
+when the callback that created this new window returns, all processing
+takes place normally, including the processing of the new window and
+its callbacks.
+<p>
+For a window of EXCLUSIVE_WINDOW mode (like a popup), the general
+order execution is:
+<p>
+<pre>
+      MakeWindow(NONEXCLUSIVE_WINDOW, ....);
+      MakeButton(...);
+      ShowDisplay();
+
+      MainLoop();     /* blocks until CloseWindow() is called */
+
+      /* do something with whatever values the popup got for us */
+</pre>
+<p>
+When MainLoop() returns for an EXCLUSIVE_WINDOW, the window has been
+closed.
+<p>
+SEE ALSO: 
+<a href="windows.html#fMW">       MakeWindow() </a>, 
+<a href="windows.html#fSD">       ShowDisplay() </a>.
+<hr>
+<p>
+<a name="fSD2"> <b>
+void   SyncDisplay(void);
+</b> </a>
+<p>
+This function synchronizes the display with all drawing requests you
+have made.  Normally it is not necessary to call this function, but if
+you make many repeated function calls to draw graphics, they will be
+updated in a chunky fashion because X buffers drawing requests and
+sends a bunch of them at once.
+<p>
+After this function completes, all drawing requests you have made are
+visible on the screen.
+<p>
+NOTE: Normally you do not need to call this function because X ensures
+      that everything you request gets drawn, but sometimes it is
+      necessary to insure the synchronization of the display.
+<hr>
+<p>
+<a name="fMW"> <b>
+Widget MakeWindow(char *window_name, char *display_name, int exclusive);
+</b> </a>
+<p>
+NOTE: Do not call this function to open your first window. Your
+application's first window is opened for you by 
+<a href="windows.html#fOD">       OpenDisplay() </a>).
+If your application only needs one window, do NOT call this
+function. 
+<p>
+This function opens a new window, possibly on a different display
+(workstation).  The new window has the name specified by the argument
+window_name and is opened on the display named by display_name (a
+string usually in the form of, "machine_name:0.0").  The final
+argument indicates whether the window should be an exclusive window or
+not (described below).
+<p>
+After this functions returns, the current window is the one you just
+created and you can begin adding widgets to it with the MakeXXX()
+calls.  After have created and added any widgets you want, you should
+call 
+<a href="windows.html#fSD">       ShowDisplay() </a>, 
+and if the window is an EXCLUSIVE_MODE window,
+then you should call 
+<a href="windows.html#fML">       MainLoop() </a> 
+(which blocks until the window is
+closed).  If you opened the window with the NONEXCLUSIVE_WINDOW
+option, you should NOT call 
+<a href="windows.html#fML">       MainLoop() </a>.
+<p>
+If you pass a NULL for the window_name, it receives a default title of
+"Untitled".
+<p>
+If you pass the #define, SAME_DISPLAY, for the display name, the
+window opens on the same display as the original window opened by
+<a href="windows.html#fOD">       OpenDisplay() </a>). 
+<p>
+The argument, exclusive, indicates what type of window to open.  A
+normal window is a NONEXCLUSIVE_WINDOW.  That is, it will not block
+the user from interacting with your existing window.  An
+EXCLUSIVE_WINDOW is a popup window that blocks input to your main
+window until the popup is closed with CloseWindow().
+<p>
+The EXCLUSIVE_WINDOW mode is useful for requestors that need an answer
+and the user should not be able to do other things in the application.
+Of course some user-interface folks don't think modal windows like
+this are good, but tough cookies for them because some times it's
+necessary. 
+<p>
+SEE ALSO: 
+<a href="windows.html#fSCW">      SetCurrentWindow() </a>
+<hr>
+<p>
+<a name="fSCW"> <b>
+void   SetCurrentWindow(Widget w);
+</b> </a>
+<p>
+This function sets the currently active window for other function
+calls such as 
+<a href="windows.html#fCW">       CloseWindow() </a>.  
+If you have multiple windows open on
+several displays, you must call this function switch the currently
+active one when you wish to manipulate the various windows. 
+<p>
+The argument, w, must be a valid value returned by MakeWindow().  If
+you would like to set the current window to be the original window
+opened by 
+<a href="windows.html#fOD">       OpenDisplay() </a>), 
+you can pass the #define, ORIGINAL_WINDOW.
+<p>
+When you change windows, the current drawing area is also changed to
+be the last current drawing area in the new window (if there is a
+drawing area in the new window).
+<p>
+SEE ALSO: 
+<a href="windows.html#fMW">       MakeWindow() </a>, 
+<a href="windows.html#fCW">       CloseWindow() </a>
+<hr>
+<p>
+<a name="fCW"> <b>
+void   CloseWindow(void);
+</b> </a>
+<p>
+This function closes and removes from the display, the currently
+active window.
+<p>
+After calling this function, you should not refer to any of the
+widgets contained in the window as they are invalid (as is the window
+handle). 
+<p>
+SEE ALSO: 
+<a href="windows.html#fSCW">      SetCurrentWindow() </a>, 
+<a href="windows.html#fMW">       MakeWindow() </a>
+<hr>
+<p>
+<a name="fGTW"> <b>
+Widget   GetTopWidget(Widget w);
+</b> </a>
+<p>
+This function returns the ID value of the top widget containing Widget w. 
+This can be useful in combination with the CloseProcedure() routine, or
+when direct calls to the Xt or Xlib libraries are to be performed on the 
+top widget.
+<p>
+SEE ALSO: 
+<a href="windows.html#fMW">       MakeWindow() </a>, 
+<a href="windows.html#fCW">       CloseWindow() </a>
+<a href="windows.html#fCP">       CloseProcedure() </a>
+<hr>
+<p>
+<a name="fCP"> <b>
+void   CloseProcedure(Widget w);
+</b> </a>
+<p>
+This function redefines the closing procedure to be used when the user
+clicks on the "Close Window" slot of the window bar. 
+<p>
+It should invoke CloseWindow() to actually close the window, but need
+not do so, in case one wants the "Close Window" slot to become
+ineffective. The value of w can be compared to any of the existing
+top window widgets by means of a call
+<pre>
+          GetTopWidget(any_widget_in_that_window).
+</pre>
+<p>
+This can be used to check which window is invoked, and so introduce
+various closing procedures for various windows.
+<p>
+SEE ALSO: 
+<a href="windows.html#fSCW">      SetCurrentWindow() </a>, 
+<a href="windows.html#fCW">       CloseWindow() </a>,
+<a href="windows.html#fGTW">      GetTopWidget() </a>

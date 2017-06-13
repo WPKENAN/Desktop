@@ -1,0 +1,75 @@
+<title>
+Local Information on Libsx
+</title>
+
+<h1> Local Libsx Information </h1>
+<p>
+<h2> Access to libsx </h2>
+<p>
+Libsx is currently compiled only for the Sun workstations running
+either Sunos 4.1.3 or Solaris 2.3.  The libsx library is in
+<tt>/usr/local/lib</tt>, and the include files are in 
+<tt>/usr/local/include</tt>.
+<p>
+<h2> Compiling and Linking to libsx with C </h2>
+<p>
+<h3> SunOS 4.1.x </h3>
+<p>
+The include files for X11 and libsx are in the standard places, so
+no special options are needed when compiling and linking.  
+<p>
+<h3> Solaris 2.3 </h3>
+<p>
+The X11 libraries are not in a standard location.  <tt>-L/usr/x11/lib</tt>
+must be used to specify the location of the libraries.  <tt>-R/usr/x11/lib</tt>
+needs to be used so that the libraries are found when run-time linking
+is performed.
+<pre>
+cc -I/usr/x11/include -I/usr/local/include -c file.c
+cc -o file -L/usr/local/lib -lsx -L/usr/x11/lib -lXaw -lXmu -lXt -lX11 -lXext \\
+ -R/usr/x11/lib -lsocket
+</pre>
+
+<p>
+<h2> Using C++ with libsx </h2>
+<p>
+Since the libsx functions were compiled with a C compiler, the libsx
+include file must be bracketed with an <tt>extern "C"</tt> declaration.
+<p>
+<pre>
+extern "C" {
+#include "libsx.h"             
+}
+</pre>
+<p> 
+<h3> Sun Specific Instructions when using C++ (Solaris 2.3) </h3>
+<p>
+Due to a bug in the C++ compiler, the -R option appears to be
+ignored by the linker.  Setting the environment variable LD_RUN_PATH
+should make run time linking work properly.  This variable should
+be set during the compilation.
+<p>
+<pre>
+setenv LD_RUN_PATH /opt/SUNWspro/lib:/usr/x11/lib
+</pre>
+<h3> Example Makefile for C++ </h3>
+<p>
+<pre>
+CPLUS = CC
+ 
+LIBS = -L/usr/local/lib -lsx -L/usr/x11/lib -lXaw -lXmu -lXt -lX11 -lXext \
+ -R/usr/x11/lib -lsocket 
+ 
+CCFLAGS = -I/usr/local/include -I/usr/x11/include
+#--------------------------------------------------------------------------
+all: gr
+ 
+gr: gr.o Graph.o
+        $(CPLUS) -o gr gr.o Graph.o $(LIBS)
+ 
+gr.o: gr.cc
+        $(CPLUS) -c $(CCFLAGS) gr.cc
+ 
+Graph.o: Graph.cc Graph.h
+        $(CPLUS) -c $(CCFLAGS) Graph.cc
+</pre>

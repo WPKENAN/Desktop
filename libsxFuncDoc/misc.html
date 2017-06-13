@@ -1,0 +1,421 @@
+<title> Miscellaneous Functions </title>
+
+<ul>
+ <li> <a href="#misc"> Miscellaneous </a>
+ <li> <a href="misc.html#fSWP">  SetWidgetPos </a>
+ <li> <a href="misc.html#fAE">   AttachEdge </a>
+ <li> <a href="misc.html#fSFC">  SetFgColor </a>
+ <li> <a href="misc.html#fSBC">  SetBgColor </a>
+ <li> <a href="misc.html#fSBC2"> SetBorderColor </a>
+ <li> <a href="misc.html#fGFC">  GetFgColor </a>
+ <li> <a href="misc.html#fGBC">  GetBgColor </a>
+ <li> <a href="misc.html#fATO">  AddTimeOut </a>
+ <li> <a href="misc.html#fSWS">  SetWidgetState </a>
+ <li> <a href="misc.html#fGWS">  GetWidgetState </a>
+ <li> <a href="misc.html#fB">    Beep </a>
+ <li> <a href="misc.html#fSWB">  SetWidgetBitmap </a>
+ <li> <a href="misc.html#fSWPX">  SetWidgetPixmap </a>
+</ul>
+<hr>
+<p>
+<h2> <a name="misc"> Miscellaneous </a> </h2>
+<p>
+The following function allows you to specify how the display should be
+layed out.  It lets you logically position the components you created
+with the MakeXXX() functions.  You will use this function to layout the
+arrangement of your buttons, labels and drawing area(s).
+<hr>
+<p>
+<a name="fSWP"> <b>
+void SetWidgetPos(Widget w, int where1, Widget from1, int where2,Widget from2);
+</b> </a>
+<p>
+This function lets you position a Widget in your window.  The idea is
+that you specify logical placement of the Widget (i.e. place it to the
+right of this widget, and under that widget).  Many layouts are
+possible, and you can even specify that you don't care where a
+specific widget is placed.
+<p>
+There are three types of placement.  You can place a widget to the
+right of another widget with PLACE_RIGHT.  If the argument "where1" is
+PLACE_RIGHT, then the Widget "w" will be placed to the right of the
+Widget "from1".  If "where1" is equal to PLACE_UNDER, "w" will be
+placed under the widget "from1".  The same holds true for the argument
+"where2" and Widget "from2".  Having two arguments is necessary to be
+able to unambiguously specify where you want components placed in the
+display.  If you don't care about where a widget is placed, you can
+use NO_CARE for the `where' argument and a NULL value for the `from'
+argument.
+<p>
+Generally, the first widget created need not be specified, it will
+always be in the top left corner.  Other widgets can the be placed
+relative to that widget.  For example, if you created 4 widgets (w[0]
+through w[3]) and wanted to arrange them in a column, you would do the
+following :
+<p>
+<pre>
+     SetWidgetPos(w[1], PLACE_UNDER, w[0], NO_CARE, NULL);
+     SetWidgetPos(w[2], PLACE_UNDER, w[1], NO_CARE, NULL);
+     SetWidgetPos(w[3], PLACE_UNDER, w[2], NO_CARE, NULL);
+</pre>
+<p>
+Notice how the third argument changes; we are placing the next widget
+underneath the previous widget.  The zero'th widget (w[0]) doesn't
+have to be placed because it is always in the top left corner (this
+can not be changed).
+<p>
+If you wanted to arrange things in a row, you would use PLACE_RIGHT
+instead of PLACE_UNDER.
+<p>
+As a more complicated example, supposed you want to create two rows of
+widgets, and a drawing area.  You would do the following :
+<p>
+<pre>
+     /* first three across the top */
+     SetWidgetPos(w[1], PLACE_RIGHT, w[0], NO_CARE, NULL);
+     SetWidgetPos(w[2], PLACE_RIGHT, w[1], NO_CARE, NULL);
+     SetWidgetPos(w[3], PLACE_RIGHT, w[2], NO_CARE, NULL);
+
+     /* next three underneath the top row */     
+     SetWidgetPos(w[4], PLACE_UNDER, w[0], NO_CARE, NULL);
+     SetWidgetPos(w[5], PLACE_UNDER, w[0], PLACE_RIGHT, w[4]);
+     SetWidgetPos(w[6], PLACE_UNDER, w[0], PLACE_RIGHT, w[5]);
+
+     /* put the drawing area under the second row */
+     SetWidgetPos(w[7], PLACE_UNDER, w[4], NO_CARE, NULL);
+</pre>
+<p>
+It is useful to think of the window as a kind of grid in which you can
+put various pieces.  Just draw a picture of what you want and then use
+<a href="misc.html#fSWP">         SetWidgetPos() </a> 
+to indicate to the system what is next to/underneath of
+what. 
+<p>
+Also, all imaginable layouts are not possible with 
+<a href="misc.html#fSWP">         SetWidgetPos() </a>.
+For example, you cannot specify specific pixel offsets for a widget,
+or that it be centered in the display, or right justified.  This
+limitaton is for the sake of simplicity.  Generally this should not be
+a problem (if it is, you are probably getting beyond the scope of what
+libsx was intended to provide, i.e. you're becoming an X hacker :).
+<p>
+You can simulate more complicated layouts by cheating and creating
+label widgets whose label is just spaces and then placing other widget
+the left or underneath the label.  This works but is kind of hackish. 
+SEE ALSO:
+<a href="misc.html#fAE">       AttachEdge() </a>, 
+<hr>
+<p>
+<a name="fAE"> <b>
+void AttachEdge(Widget w, int edge, int attach_to)
+</b> </a>
+<p>
+Attaches an edge of widget to an attach position. Possible values for edge 
+and attach respectively are 
+<pre>
+  RIGHT_EDGE, LEFT_EDGE, TOP_EDGE, BOTTOM_EDGE, 
+  ATTACH_RIGHT, ATTACH_LEFT, ATTACH_TOP, ATTACH_BOTTOM.
+</pre>
+The result of the AttachEdge procedure is that the relative positions of 
+the specified "edge" and "attach_to" objects remain fixed once for all, 
+even when the window is resized.
+<p>
+SEE ALSO:
+<a href="misc.html#fSWP">       SetWidgetPos() </a>, 
+<hr>
+<p>
+<a name="fSFC"> <b>
+void  SetFgColor(Widget w, int color);
+</b> </a>
+<p>
+This function sets the foreground color of a widget. If the widget is
+a drawing area, all future primitives are drawn with the specified
+color.  If the widget is some other type of widget, it sets the
+foreground color of the widget (such as its text) to be the specified
+color. 
+<p>
+The argument "color" should be an integer that was returned from the
+colormap functions (
+<a href="color.html#fGNC">        GetNamedColor() </a>, 
+<a href="color.html#fGRGBC">      GetRGBColor() </a>, 
+<a href="color.html#fGPC">        GetPrivateColor() </a>
+or 
+<a href="color.html#fGSC">        GetStandardColors() </a>). 
+<p>
+SEE ALSO : 
+<a href="drawing.html#fSC">       SetColor() </a>, 
+<a href="misc.html#fSBC">         SetBgColor() </a>, 
+<a href="misc.html#fSBC2">        SetBorderColor() </a>,
+<a href="color.html#fGSC">        GetStandardColors() </a>, 
+<a href="color.html#fGNC">        GetNamedColor() </a>, 
+<a href="color.html#fGRGBC">      GetRGBColor() </a>
+<hr>
+<p>
+<a name="fSBC"> <b>
+void  SetBgColor(Widget w, int color);
+</b> </a>
+<p>
+This function sets the background color of a widget.  If the specified
+widget is a drawing area, the next call to ClearDrawArea() will clear
+the drawing area to the specified background color.
+<p>
+The argument "color" should be an integer that was returned from the
+colormap functions (
+<a href="color.html#fGNC">        GetNamedColor() </a>, 
+<a href="color.html#fGRGBC">      GetRGBColor() </a>, 
+<a href="color.html#fGPC">        GetPrivateColor() </a>
+or 
+<a href="color.html#fGSC">        GetStandardColors() </a>). 
+<p>
+SEE ALSO : 
+<a href="misc.html#fSBC">         SetBgColor() </a>, 
+<a href="misc.html#fSBC2">        SetBorderColor() </a>, 
+<a href="color.html#fGSC">        GetStandardColors() </a>,
+<a href="color.html#fGNC">        GetNamedColor() </a>, 
+<a href="color.html#fGRGBC">      GetRGBColor() </a>
+<hr>
+<p>
+<a name="fSBC2"> <b>
+void  SetBorderColor(Widget w, int color);
+</b> </a>
+<p>
+This argument will set the border color that is drawn around a widget.
+The same effect happens for all of the different widgets -- the border
+is redrawn with the new color.  This can be very useful for giving a
+nice visual offset to an important or dangerous button.  Of course you
+should avoid garish combinations of colors that are hard to look at.
+<p>
+SEE ALSO : 
+<a href="misc.html#fSBC">         SetBgColor() </a>, 
+<a href="misc.html#fSBC2">        SetBorderColor() </a>, 
+<a href="color.html#fGSC">        GetStandardColors() </a>,
+<a href="color.html#fGNC">        GetNamedColor() </a>, 
+<a href="color.html#fGRGBC">      GetRGBColor() </a>
+<hr>
+<p>
+<a name="fGFC"> <b>
+int   GetFgColor(Widget w);
+</b> </a>
+<p>
+This routine is a convience function that will return the current
+foreground color of any kind of widget.  This is mainly useful for
+drawing widgets to make sure that you draw things in the proper
+foreground color.  This can arise as a problem if you assume that
+black is going to be the default foreground color (which it normally
+is).  However, the user can change this default by using the -fg
+"color" option on the command line.  This is an X command line option,
+and can not be overriden by your program.  A real application would
+use this function to check the value and use it to draw in the user's
+preferred foreground color.  Other programs can just ignore the
+problem and still work ok as long as the user doesn't change the
+program's colors.
+<p>
+This function returns the integer value of the foreground color that
+you can use in later calls to 
+<a href="misc.html#fSFC">         SetFgColor() </a> 
+or 
+<a href="drawing.html#fSC">       SetColor() </a>. 
+It returns -1 if you passed an invalid Widget to it.
+<p>
+SEE ALSO : 
+<a href="misc.html#fGBC">         GetBgColor() </a>, 
+<a href="drawing.html#fSC">       SetColor() </a>, 
+<a href="misc.html#fSFC">         SetFgColor() </a>
+<hr>
+<p>
+<a name="fGBC"> <b>
+int   GetBgColor(Widget w);
+</b> </a>
+<p>
+This routine is a convience function that will return the current
+background color of any kind of widget.  This is mainly useful for
+drawing widgets to make sure that you draw things in the proper
+background color.  This can be a problem if you assume that white is
+going to be the default background color (which it normally is).
+However, the user can change this default by using the -bg "color"
+option on the command line.  This is an X command line option, and can
+not be overriden by your program.  A real application would use this
+function to check the value and use it to draw in the user's preferred
+background color.  Other programs can just ignore the problem and
+still work ok as long as the user doesn't change the program's colors.
+<p>
+The other problem that crops up if you ignore the background color is
+that if you go to erase something by just drawing in white and white
+doesn't happen to be the actual background color, your program will
+look funny. 
+<p>
+This function returns the integer value of the background color that
+you can use in later calls to 
+<a href="misc.html#fSBC">         SetBgColor() </a> 
+or 
+<a href="drawing.html#fSC">       SetColor() </a>. 
+It returns -1 if you passed an invalid Widget to it.
+<p>
+SEE ALSO : 
+<a href="misc.html#fGFC">         GetFgColor() </a>, 
+<a href="drawing.html#fSC">       SetColor() </a>, 
+<a href="misc.html#fSFC">         SetFgColor() </a>
+<hr>
+<p>
+<a name="fATO"> <b>
+void  AddTimeOut(unsigned long interval, void (*func)(), void *data);
+</b> </a>
+<p>
+If you would like to animate a display or do some periodic processing
+(such as an auto-save feature for an editor), you can use time-outs.
+<p>
+A time-out is a callback function that gets called when the specified
+amount of time has expired (or I should say more precisely, when at
+_least_ that much time has passed, Unix a'int no real time system).
+<p>
+The argument `interval' is an unsigned long and is specified in
+milliseconds. That is, a time out of 1 second would be an argument of
+1000.
+<p>
+The function, func, declared as follows:
+<p>
+<pre>
+        void  func(void *data, XtIntervalId *id)
+	{
+	}
+</pre>
+<p>
+The second argument should be ignored by function's code, but it
+should appear in the function prototype.
+<p>
+The function is only called once, if you would like the function to be
+called repeatedly (to update an animation for example), the last thing
+the function should do is to call AddTimeOut() again.
+<hr>
+<p>
+<a name="fSWS"> <b>
+void  SetWidgetState(Widget w, int state); 
+</b> </a>
+<p>
+This function lets you enable or disable particular widgets in an
+interface.  If, for example, choosing one item from a menu should
+disable various other widgets, you can call this function.
+<p>
+The Widget argument is the widget in question.  The state argument is
+a boolean, which indicates whether the widget should be active or not.
+A value of TRUE indicates that the widget should accept input, and a
+value of FALSE indicates that the widget should not accept input (it
+becomes greyed out).
+<p>
+When you disable a widget, the user can no longer interact with that
+widget in _any_ way (it becomes grey'ed out and just ignores all
+input). 
+<hr>
+<p>
+<a name="fGWS"> <b>
+int   GetWidgetState(Widget w);
+</b> </a>
+<p>
+This function returns a boolean value indicating whether or not 
+the specified widget is currently active.
+<p>
+If the widget is active and accepting input, the return is TRUE, if
+the widget is inactive, the return value is FALSE.
+<hr>
+<p>
+<a name="fB"> <b>
+void  Beep(void);
+</b> </a>
+<p>
+This function is real complicated.  It beeps the workstation speaker. 
+<hr>
+<p>
+<a name="fRL"> <b>
+void ReadLocale(char *language);
+</b> </a>
+<p>
+Reads the dialogs file (normally stored in /usr/share/libsx/dialogs.XX
+where XX is the two-letter code for the language). This function can be 
+used to override the environment variable LANG.
+<hr>
+<p>
+<a name="fSWB"> <b>
+void  SetWidgetBitmap(Widget w, char *data, int width, int height);
+</b> </a>
+<p>
+This function lets you attach a bitmap to a widget instead of its
+default text.  This function only works correctly on Button, Toggle
+and Label widgets.  Using it on another type of widget yields
+undefined results.
+<p>
+The Widget, w, will display the bitmap data given by the argument,
+data, whose width and height are given as the last two arguments.
+<p>
+The bitmap data is only one bitplane deep, and is usually produced by
+a somewhat brain-dead X program called `bitmap'.  The output of the
+bitmap program is a file you can directly #include in your source
+code.  The contents of the file are a static array of characters and
+two #defines that give the width and height of the bitmap.
+<p>
+Thus, making a widget with a bitmap is a two step process.  First you
+would edit a bitmap using the `bitmap' program, then you would do the
+following: 
+<p>
+<pre>
+          #include  "file_bmap.h"
+
+          Widget w;
+
+	  w = MakeButton(NULL, func, some_data_ptr);
+	  SetWidgetBitmap(w, file_bmap_bits,file_bmap_width,file_bmap_height);
+</pre>
+<p>
+Bits which are a one in the bitmap are drawn in the widget's current
+foreground color and zero bits are drawn in the current background
+color.
+<p>
+SEE ALSO : 
+<a href="misc.html#fSWPX">         SetWidgetPixmap() </a>, 
+<a href="scrollbar.html#fSTB">     SetThumbBitmap() </a>
+<hr>
+<p>
+<a name="fSWPX"> <b>
+void  SetWidgetPixmap(Widget w, char **xpmdata);
+</b> </a>
+<p>
+This function lets you attach a pixmap to a widget instead of its
+default text.  This function only works correctly on Button, Toggle
+and Label widgets.  Using it on another type of widget yields
+undefined results.
+<p>
+The Widget, w, will display the pixmap data given by the argument
+xpmdata.
+<p>
+The pixmap data can be produced by the standard X program called `pixmap'.
+It can also be obtained with many other drawing tools, using the so called
+xpm format. An .xpm file is a file you can directly #include in your source
+code.  The contents of the file is a static array of strings of the form
+<pre>
+          static char * mypix_xpm[] = {
+          "48 32 3 1",
+          "o      c grey76",
+          ".      c blue",
+          "X      c LimeGreen",
+          "o.XXX.ooooXXX...o.XXX.ooooXXX...o.XXX.ooooXXX...",
+          ...
+          };
+</pre>
+to indicate width=48  height=32  num_colors=3  cpp=1 (1 character used 
+per pixel), 'o' will code for grey76, '.' for blue and 'X' for LimeGreen.
+The remaining strings are strings representing the rows of pixels, e.g.
+"o.XXX.ooooXXX...o.XXX.ooooXXX...o.XXX.ooooXXX...",
+for the first row of 48 pixels.
+<p>
+Let us suppose that you want to set a pixmap on a button. You would first
+create the desired pixmap "mypix.xpm" with the pixmap program, then you
+would do the following: 
+<pre>
+          #include  "mypix.xpm"
+
+          Widget w;
+
+	  w = MakeButton(NULL, func, some_data_ptr);
+	  SetWidgetPixmap(w, mypix_xpm);
+</pre>
+SEE ALSO : 
+<a href="misc.html#fSWB">          SetWidgetBitmap() </a>

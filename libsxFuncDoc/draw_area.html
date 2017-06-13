@@ -1,0 +1,298 @@
+<title> Drawing Area </title>
+
+<ul>
+ <li> <a href="#draw"> Drawing Area </a>
+ <li> <a href="draw_area.html#fMDA">   MakeDrawArea </a>
+ <li> <a href="draw_area.html#fSBDCB"> SetButtonDownCB </a>
+ <li> <a href="draw_area.html#fSBUCB"> SetButtonUpCB </a>
+ <li> <a href="draw_area.html#fSKCB">  SetKeypressCB </a>
+ <li> <a href="draw_area.html#fSMMCB"> SetMouseMotionCB </a>
+ <li> <a href="draw_area.html#fSECB">  SetEnterCB </a>
+ <li> <a href="draw_area.html#fSLCB">  SetLeaveCB </a>
+</ul>
+<hr>
+<p>
+<h2> <a name="draw"> Drawing Area </a> </h2>
+<p>
+A drawing area is a rectangular area that supports drawing into,
+receiving input from (mouse clicks, mouse motion and keypresses) and
+redisplay requests from X.  You can draw any sort of graphics into a
+drawing area as well as perform various types of interaction with
+mouse and keyboard input.
+<p>
+It is also useful to read the 
+<a href="drawing.html"> drawing.html </a>
+file for more information on
+the actual drawing routines available.
+<p>
+<hr>
+<a name="fMDA"> <b>
+Widget MakeDrawArea(int width, int height, RedisplayCB func, void *data);
+</b> </a>
+<p>
+The function MakeDrawArea() creates a drawing area which you can later
+use to draw graphics into and receive mouse and keyboard input from.
+The drawing are will have a width and height as you specify.  The
+callback function, func, is called whenever the drawing area should be
+redisplayed (because it was obscured or resized).  The argument "data"
+is a pointer to any arbitrary data you want, and it is passed directly
+to the resize callback (and the other callbacks as well).
+<p>
+The redisplay callback is where you should put all of your drawing
+code.  It is called for you when the application opens the window for
+the first time (by calling MainLoop()).  The redisplay callback
+function should be declared as follows:
+<p>
+<pre>
+    void  redisplay(Widget w, int width, int height, void *data)
+    {
+    }
+</pre>
+<p>
+The first argument, w, is the drawing area widget that needs to be
+redrawn.  The second and third arguments are the new width and height
+of the drawing area (it may have been resized).  The final argument
+is the void pointer passed to MakeDrawArea().
+<p>
+If you are interested in receiving other types of input, see the
+functions, 
+<a href="draw_area.html#fSBDCB">  SetButtonDownCB() </a>, 
+<a href="draw_area.html#fSBUCB">  SetButtonUpCB() </a>, 
+<a href="draw_area.html#fSKCB">   SetKeypressCB() </a> 
+<a href="draw_area.html#fSMMCB">  SetMouseMotionCB() </a>,
+<a href="draw_area.html#fSECB>	SetEnterCB() </a>,
+and
+<a href="draw_area.html#fSLCB>	SetLeaveCB() </a>.  
+These functions will let you set callbacks for
+the other types of input.
+<p>
+Each drawing area you create has its own state (foreground and
+background colors, drawing mode, and line width).  Only one drawing
+area can be active at any given time.  When an event happens for a
+drawing area, that drawing area becomes the active drawing area.  You
+can make other drawing areas active with 
+<a href="drawing.html#fSDA2">     SetDrawArea() </a>.
+<p>
+If something goes wrong in creating the DrawArea, a NULL value is
+returned. 
+<p>
+SEE ALSO : 
+<a href=drawing.html>drawing.html</a>, 
+<a href="draw_area.html#fSBDCB">  SetButtonDownCB() </a>, 
+<a href="draw_area.html#fSBUCB">  SetButtonUpCB() </a>,
+<a href="draw_area.html#fSKCB">   SetKeypressCB() </a>, 
+<a href="draw_area.html#fSMMCB">  SetMouseMotionCB() </a>, 
+<a href="draw_area.html#fSECB>	SetEnterCB() </a>, 
+<a href="draw_area.html#fSLCB>	SetLeaveCB() </a>, 
+<a href="misc.html#fSWP">         SetWidgetPos() </a>,
+<a href="font.html#fSWF">         SetWidgetFont() </a>, 
+<a href="misc.html#fSFC">         SetFgColor() </a>, 
+<a href="misc.html#fSBC">         SetBgColor() </a>, 
+<a href="misc.html#fSBC2">        SetBorderColor() </a> 
+<hr>
+<p>
+<a name="fSBDCB"> <b>
+void   SetButtonDownCB(Widget w, MouseButtonCB func);
+</b> </a>
+<p>
+This function sets up a callback that will be called everytime the
+user presses a mouse button in the specified drawing area widget `w'.
+<p>
+The callback function should be declared as follows:
+<p>
+<pre>
+    void  func(Widget w, int which_button, int x, int y, void *data)
+    {
+    }
+</pre>
+<p>
+Then, whenever the user presses a mouse button in the drawing area,
+your callback is called.  The first argument is the drawing area
+widget where the event happened.  The next argument is an integer
+specifying which button was pressed.  It is a small positive integer.
+A value of one is the left mouse button, two is the middle mouse
+button and three is the right mouse button.  Technically, values of
+four and five are also possible though I've never seen a mouse with
+five buttons.  The x and y arguments are the position of the mouse
+where the user pressed the mouse button.  The final argument is the
+void pointer argument given to 
+<a href="draw_area.html#fMDA">    MakeDrawArea() </a>.
+<p>
+You can specify a NULL for the function to turn off receiving button
+down events.
+<hr>
+<p>
+<a name="fSBUCB"> <b>
+void   SetButtonUpCB(Widget w, MouseButtonCB button_up);
+</b> </a>
+<p>
+This function sets up a callback that will be called everytime the
+user releases a mouse button in the specified drawing area widget `w'. 
+<p>
+The callback function should be declared as follows:
+<p>
+<pre>
+    void  func(Widget w, int which_button, int x, int y, void *data)
+    {
+    }
+</pre>
+<p>
+Then, whenever the user releases a mouse button in the drawing area,
+your callback is called.  The first argument is the drawing area
+widget where the event happened.  The next argument is an integer
+specifying which button was released.  It is a small positive integer.
+A value of one is the left mouse button, two is the middle mouse
+button and three is the right mouse button.  Technically, values of
+four and five are also possible though I've never seen a mouse with
+five buttons.  The x and y arguments are the position of the mouse
+where the user released the mouse button.  The final argument is the 
+void pointer argument given to 
+<a href="draw_area.html#fMDA">    MakeDrawArea() </a>.
+<p>
+You can specify a NULL for the function to turn off receiving button
+up events.
+<hr>
+<p>
+<a name="fSKCB"> <b>
+void   SetKeypressCB(Widget w, KeyCB func);
+</b> </a>
+<p>
+This function lets you set a callback so that you will receive
+keyboard input in the drawing area.
+<p>
+The callback function should be declared as follows:
+<p>
+<pre>
+      void  func(Widget w, char *input, int up_or_down, void *data)
+      {
+      }
+</pre>
+<p>
+Then, whenever the user presses keys in the drawing area, your
+callback function is called.  The first argument is the drawing area
+widget where the event happened.  The next argument is a character
+pointer to a null-terminated string that contains what was typed by
+the user.  The up_or_down argument indicates whether the key was pressed
+released (a zero indicates a press, a 1 indicates a key release). The final 
+argument is the void ponter argument given to MakeDrawArea(). 
+<p>
+It is useful to know that the string returned to your program is
+not necessarily a single ASCII character. You will get the usual
+ASCII characters, including control characters (such as ^C or ^H).
+But, the workstation's function keys will also be returned in a
+string such as "F11" or "F23".  You will also get other longer
+strings such as "Control_L", "Alt_R", or "Shift_L".  It is
+important to understand that even if you just press the shift key to
+get a capital letter, you will first receive the string "Shift_L"
+or "Shift_R", then you will receive a capital letter (say, "H").
+You should probably ignore the "Shift_L" or "Shift_R" messages (but
+who knows, you may find some use for them).
+<p>
+The argument, up_or_down, tells you whether the given key was pressed
+or released.  If the key was pressed down, up_or_down has a zero (0),
+if the key was released, up_or_down contains a 1.  This is useful for 
+doing things like shift-clicking with the mouse or handling control-key
+combinations in an editor or other program.
+<p>
+The arrow keys return strings such as "Left", "Up", "Right", or
+"Down".  Other keys on the keyboard may return strings such as "Home",
+"Prior", "Next", "Undo", "Help", etc.  Of course not all keyboards
+generate all of the strings (because they aren't set up to).
+<p>
+NOTE WELL:
+  The string that is returned to you can <b>NOT</b> be modified 
+  by your program. If you want to munge with it, make a copy using
+  strdup() or strcpy() into your own buffer space.
+<p>
+You can specify a NULL for the function to turn off receiving keypress
+events.
+<hr>
+<p>
+<a name="fSMMCB"> <b>
+void   SetMouseMotionCB(Widget w, MotionCB func);
+</b> </a>
+<p>
+This function sets a callback so that whenever the mouse moves in your
+drawing area, the specified function will be called.  It is important
+to keep in mind that the function you specify is called _every_ time
+the mouse moves in the drawing area, even if it is just passing
+through. 
+The callback function should be declared as follows:
+<p>
+<pre>
+    void  func(Widget w, int x, int y, void *data);
+    {
+    }
+</pre>
+<p>
+The first argument is (as usual) the Widget where the mouse was moved
+in.  The next two arguments are the current X and Y values of the
+mouse.  The final argument is the void pointer passed into
+<a href="draw_area.html#fMDA">    MakeDrawArea() </a>.
+<p>
+You should be very frugal with what happens in this function so as not
+to cause the application to lag behind the user too much.  Calling
+functions like sleep() are definitely out of the question.
+<p>
+You can specify a NULL for the function to turn off receiving mouse
+motion events.
+
+
+<hr>
+<p>
+<a name="fSECB"> <b>
+void   SetEnterCB(Widget w, EnterCB func);
+</b> </a>
+<p>
+This function sets a callback so that whenever the mouse crosses the
+boundary of your drawing area from the outside in, the specified
+function will be called.
+<p>
+The callback function should be declared as follows:
+<p>
+<pre>
+    void  func(Widget w, int x, int y, void *data);
+    {
+    }
+</pre>
+<p>
+The first argument is (as usual) the Widget that the mouse entered.
+The next two arguments are the X and Y coordinates of the crossing
+point.  The final argument is the void pointer passed into
+<a href="draw_area.html#fMDA">    MakeDrawArea() </a>.
+<p>
+The coordinates may be inaccurate if the mouse moved rapidly;
+they may even fall outside the widget's boundaries.
+<p>
+You can specify a NULL for the function to turn off receiving mouse
+enter events.
+<p>
+<hr>
+<p>
+<a name="fSLCB"> <b>
+void   SetLeaveCB(Widget w, EnterCB func);
+</b> </a>
+<p>
+This function sets a callback so that whenever the mouse crosses the
+boundary of your drawing area from the inside out, the specified
+function will be called.
+<p>
+The callback function should be declared as follows:
+<p>
+<pre>
+    void  func(Widget w, int x, int y, void *data);
+    {
+    }
+</pre>
+<p>
+The first argument is (as usual) the Widget that the mouse exited.
+The next two arguments are the X and Y coordinates of the crossing
+point.  The final argument is the void pointer passed into
+<a href="draw_area.html#fMDA">    MakeDrawArea() </a>.
+<p>
+The coordinates may be inaccurate if the mouse moved rapidly;
+they may even fall outside the widget's boundaries.
+<p>
+You can specify a NULL for the function to turn off receiving mouse
+exit events.
+<p>

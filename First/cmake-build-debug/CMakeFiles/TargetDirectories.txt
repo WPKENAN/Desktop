@@ -1,0 +1,3 @@
+/home/wpkenan/Desktop/First/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/wpkenan/Desktop/First/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/wpkenan/Desktop/First/cmake-build-debug/CMakeFiles/First.dir

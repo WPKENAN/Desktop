@@ -1,0 +1,185 @@
+<title>
+How to Use libsx
+</title>
+
+<h1> General Information on Using Libsx </h1>
+
+Using libsx is pretty simple.  At the minimum, you #include "libsx.h"
+and link with libsx.a.  To actually have X windows pop open and such,
+you need to do the following:
+<p>
+<ol>
+<li> To get everything started, you should call 
+<a href="windows.html#fOD">       OpenDisplay() </a>).
+If 
+<a href="windows.html#fOD">       OpenDisplay() </a>) 
+returns a non-zero value, it's ok to go on.
+<a href="windows.html#fOD">       OpenDisplay() </a>) 
+creates what will eventually be your first 
+window. 
+     
+<li> After calling 
+<a href="windows.html#fOD">       OpenDisplay() </a>), 
+you can go on to create all sorts
+of widgets with the MakeXXX() calls.  You can lay them out with
+calls to 
+<a href="misc.html#fSWP">         SetWidgetPos() </a>.
+
+<li> When you are done creating the user interface, call
+<a href="windows.html#fSD">       ShowDisplay() </a>.  
+This causes the window and components you've
+created to be displayed on the workstation screen.
+<p>
+Until you call 
+<a href="windows.html#fSD">       ShowDisplay() </a>, 
+the user can <b>NOT</b> see your
+window, and drawing into drawing areas has <b>NO</b> effect.
+
+<li> If you need to, you can call any of the color allocation
+functions such as 
+<a href="color.html#fGSC">        GetStandardColors() </a>, 
+etc.
+
+<li> Finally, once the window is displayed and you've done all the
+initializations you wish, you must then call 
+<a href="windows.html#fML">       MainLoop() </a>. 
+After you call 
+<a href="windows.html#fML">       MainLoop() </a>, 
+events get processed as they come in and
+your callback functions are called as necessary.
+<p>
+After calling 
+<a href="windows.html#fML">       MainLoop() </a>, 
+the correct way for your program to
+exit is to have one of your callback routines call exit() when
+appropriate (like after the user clicks on a "Quit" button).
+
+<li> There is a predefined procedure
+<a href="windows.html#fCP">       CloseProcedure() </a>,
+with a single argument
+<pre>
+         CloseProcedure(Widget w)
+</pre>
+which is called each time the user presses the "Delete Window" slot of
+the window bar. Its default action is to close the active window, and
+to exit the application if that window is the original main window. 
+You can redefine it to do whatever you like before closing (or to 
+prevent the window being closed).
+
+</ol>
+<p>
+That's all you need to do.  Even though that may look like a lot to
+do, it's really pretty simple in practice.  For example, here is a
+hello world program with libsx:
+<p><p>
+<pre>
+#include "libsx.h"
+
+main()
+{
+  MakeLabel("Hello World!");
+  MainLoop();
+}
+</pre>
+<p><p>
+Granted it's one more line than a standard printf() type of hello
+world program, but it's not all that bad. 
+<p>
+Hello world programs are nice, but you don't tend to write very many
+of them.  Real applications need to be able to do much more.  Even
+these "real" programs aren't all that bad in libsx. 
+<p>
+Here is a simple program that opens a window with a quit button and a
+drawing area that you could use to draw whatever graphics you wanted: 
+<p><p>
+<pre>
+#include &lt;stdio.h&gt;
+#include "libsx.h"
+
+void quit(Widget w, void *data)
+{
+  exit(0);
+}
+
+
+void draw_stuff(Widget w, int width, int height, void *data)
+{
+  ClearDrawArea();
+  DrawLine(0,0, width, height);   /* just draw a diagonal line */
+}
+  
+int main(int argc, char **argv)
+{
+  Widget w[2];
+
+
+  argc = OpenDisplay(argc, argv);
+  if (argc == 0)                   /* woops, couldn't get started */
+    exit(5);
+  
+  
+  w[0] = MakeButton("Quit", quit, NULL);
+  w[1] = MakeDrawArea(300,300, draw_stuff, NULL);
+
+  SetWidgetPos(w[1], PLACE_UNDER, w[0], NO_CARE, NULL);
+
+  ShowDisplay();
+  GetStandardColors();
+
+  MainLoop();   /* off we go! */
+}
+<p>
+</pre>
+<p>
+Here is how one would redefine the CloseProcedure to make it do
+some further stuff before closing.
+<p><p>
+<pre>
+void CloseProcedure(Widget w)
+{
+  if(w == GetTopWidget(a_widget_in_the_main_window)))
+    {
+    printf("Main window closed by user\n");
+    exit(0);
+    }
+  else
+    {
+    printf("Auxilliary window closed by user\n");
+    SetCurrentWindow(w);
+    CloseWindow(); /* This actually closes the window */
+    }
+
+  /* Don't include exit(0) or CloseWindow() if you want to prevent the
+     window from closing */
+}
+
+</pre>
+<p><p>
+The code above is the basic skeleton for a libsx program, even
+complicated ones.  First you open the display with OpenDisplay().
+Then you build your interface by creating a bunch of widgets with the
+MakeXXX() calls.  Next you layout the display by specifying the
+relative positions of the widgets to each other.  Then you would get
+any fonts or colors you may need, and finally you just enter the main
+loop.
+<p>
+In libsx, your callback functions are where all the real work happens.
+The program above has two callback functions, quit() and draw_stuff().
+They are tied to events that happen in the interface.  When the user
+clicks on the "Quit" button, your quit() function is called.  When the
+drawing area gets resized or needs to be redrawn, your draw_stuff()
+function gets called.
+<p>
+Usually the process of creating the interface would get separated into
+a separate function that is easy to modify (instead of cluttering up
+main).   However, the basic outline is the same as above.  The only
+real difference with more complicated interfaces is that they usually
+have a lot more calls to the MakeXXX() functions and they tend to make
+use of the extra void pointer argument in the callback routines.
+<p>
+If you'd like more examples, take a look at the provided source code.
+There are several reasonable examples of varying complexity that you
+can take and modify as you like.  Each of the demos tries to
+demonstrate a certain group of features, so take a look at each to
+find the one that most closely matches what you want to do and start
+hacking from there!

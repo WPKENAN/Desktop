@@ -1,0 +1,178 @@
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <fstream>
+#include "bits/stdc++.h"
+using namespace std;
+
+#define maxn 90000  //最大顶点个数
+int n;       //顶点个数
+
+struct arcnode  //边结点
+{
+    int vertex;     //与表头结点相邻的顶点编号
+    int weight;     //连接两顶点的边的权值
+    arcnode * next; //指向下一相邻接点
+    arcnode() {}
+    arcnode(int v,int w):vertex(v),weight(w),next(NULL) {}
+};
+
+struct vernode      //顶点结点，为每一条邻接表的表头结点
+{
+    int vex;    //当前定点编号
+    arcnode * firarc;   //与该顶点相连的第一个顶点组成的边
+}Ver[maxn];
+
+void Init()  //建立图的邻接表需要先初始化，建立顶点结点
+{
+    for(int i = 1; i <= n; i++)
+    {
+        Ver[i].vex = i;
+        Ver[i].firarc = NULL;
+    }
+}
+
+struct pixel{//存储坐标像素点
+	int x;
+	int y;
+}Pixel[maxn];
+
+void Insert2(int a, int b, int w)   //头插法，效率更高，但不能去重边
+{
+    arcnode * q = new arcnode(b, w);
+    if(Ver[a].firarc == NULL)
+        Ver[a].firarc = q;
+    else
+    {
+        arcnode * p = Ver[a].firarc;
+        q->next = p;
+        Ver[a].firarc = q;
+    }
+}
+
+struct node     //顶点节点，保存id和到源顶点的估算距离，优先队列需要的类型
+{
+    int id;     //源顶点id和估算距离
+    int w;
+    friend bool operator<(node a, node b)   //因要实现最小堆，按升序排列，因而需要重载运算符，重定义优先级，以小为先
+    {
+        return a.w > b.w;
+    }
+};
+
+#define INF 0xfffff    //权值上限
+int pre[maxn];   //每个顶点的父亲节点，可以用于还原最短路径树
+bool visited[maxn]; //用于判断顶点是否已经在最短路径树中，或者说是否已找到最短路径
+node d[maxn];      //源点到每个顶点估算距离，最后结果为源点到所有顶点的最短路。
+priority_queue<node> q; //优先队列stl实现
+
+void Dijkstra(int s)    //Dijkstra算法，传入源顶点
+{
+    for(int i = 1; i <= n; i++) //初始化
+    {
+        d[i].id = i;
+        d[i].w = INF;           //估算距离置INF
+        pre[i] = -1;         //每个顶点都无父亲节点
+        visited[i] = false;     //都未找到最短路
+    }
+    
+    d[s].w = 0;                 //源点到源点最短路权值为0
+    q.push(d[s]);               //压入队列中
+    while(!q.empty())           //算法的核心，队列空说明完成了操作
+    {
+        node cd = q.top();      //取最小估算距离顶点
+        q.pop();
+        
+        int u = cd.id;
+        if(visited[u])   //注意这一句的深意，避免很多不必要的操作
+            continue;
+        visited[u] = true;
+        
+        arcnode * p = Ver[u].firarc;
+        
+        //松弛操作
+        while(p != NULL)    //找所有与他相邻的顶点，进行松弛操作，更新估算距离，压入队列。
+        {
+            int v = p->vertex;
+            if(!visited[v] && d[v].w > d[u].w+p->weight)
+            {
+                d[v].w = d[u].w+p->weight;
+                pre[v] = u;
+                q.push(d[v]);
+//                path[k]=u; 
+            }
+            p = p->next;
+        }
+    }
+}
+
+void showPath(int v0,int v){
+	stack<int> s;
+    int u=v;
+    while(v!=v0)
+    {
+        s.push(v);
+        v=pre[v];
+    }
+    cout << s.size() << endl;
+    s.push(v);
+    int length=s.size();
+    for(int i=0;i<length-1;i++)
+    {
+        cout<< s.top() << "->" ;
+        s.pop();
+    }
+    cout<< s.top();
+    cout << endl;
+     
+}
+//#define test
+int main(){
+#ifdef test
+	freopen("usa.txt","r",stdin);
+#endif
+	ifstream fin("usa.txt");
+	
+    int m, a, b, c, st, ed;
+    printf("请输入顶点数和边数：\n");
+//    scanf("%d%d", &n, &m);
+	fin >> n >> m;
+    cout << n << ' ' << m << endl;   
+    
+    //初始化坐标
+    for(int i=0;i<n;i++){
+    	int point,x,y;  	
+    	fin >> point >> x >> y;
+    	Pixel[point].x=x;
+    	Pixel[point].y=y;
+    	
+    }
+    
+    Init();     //计算前必须初始化
+    printf("请输入边以及权值（a, b, c)\n");
+    while(m--)
+    {
+        fin >> a >> b;
+        c=sqrt((Pixel[a].x-Pixel[b].x)*(Pixel[a].x-Pixel[b].x)+(Pixel[a].y-Pixel[b].y)*(Pixel[a].y-Pixel[b].y));
+        cout << a << ' ' << b << endl;
+        Insert2(a, b, c);   //无向图注意存储两条边
+        Insert2(b, a, c);
+    }
+    cout << m << endl;
+    printf("请输入起点和终点：\n");
+    while(scanf("%d%d", &st, &ed)){
+    	
+//		st=727;
+		Dijkstra(st);
+		if(d[ed].w != INF){
+			printf("最短路径权值为：%d\n", d[ed].w);
+			showPath(st,ed);
+		}
+		    
+		else
+		    printf("不存在从顶点%d到顶点%d的最短路径。\n", st, ed);
+		   
+    }
+    return 0;
+}

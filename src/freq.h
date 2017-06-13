@@ -1,0 +1,1 @@
+char *GetFile(char *path);

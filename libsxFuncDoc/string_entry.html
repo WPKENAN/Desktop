@@ -1,0 +1,125 @@
+<title> String Entry </title>
+
+<ul>
+ <li> <a href="#string"> String Entry </a>
+ <li> <a href="string_entry.html#fMSE"> MakeStringEntry </a>
+ <li> <a href="string_entry.html#fSSE"> SetStringEntry </a>
+ <li> <a href="string_entry.html#fGSE"> GetStringEntry </a>
+</ul>
+<hr>
+<p>
+<h2> <a name="string"> String Entry </a> </h2>
+<p>
+A string entry widget is a widget that lets a user enter a single line
+of ASCII text.  When the user presses return in the widget, a callback
+is made to your application with a pointer to the new text.  Support
+routines also exist to Set and Get the text in the widget.
+<p>
+If you want multiple lines of text, see the text edit widget
+documentation. 
+<hr>
+<p>
+<a name="fMSE"> <b>
+Widget MakeStringEntry(char *txt, int size, StringCB func, void *data);
+</b> </a>
+<p>
+This function makes a string input widget.  A string input widget is a
+widget that lets a user enter/edit a single line string value such as
+a filename.   
+<p>
+The first argument is any default text you would like in the string
+entry widget.  You can specify NULL or "" if you don't want anything
+to appear.
+<p>
+The next argument is the width in pixels of the string entry area.  Be
+careful in specifying the width since the default font used by the
+widget may not be wide enough to contain the text you want.  It is
+best if you call 
+<a href="font.html#fGWF">         GetWidgetFont() </a> 
+and then call 
+<a href="font.html#fTW">          TextWidth() </a> 
+on a string of reasonable length and use the value returned by 
+<a href="font.html#fTW">          TextWidth() </a> 
+to be the width of the widget.  If you're lazy, a value of 150-200 is
+usually pretty good.
+<p>
+The next argument is a callback function that is called whenever the
+user presses return in the string entry widget.  The callback function
+should be declared as follows:
+<p>
+<pre>
+     void func(Widget w, char *string, void *data)
+     {
+     }
+</pre>
+<p>
+The first argument to the callback is the widget where the user
+pressed return.  For the most part you can ignore this (unless you
+want to change the text).  The second argument is a pointer to the
+string of text the user entered.  The final argument is the user data
+pointer you passed in to 
+<a href="string_entry.html#fMSE"> MakeStringEntry() </a>.
+<p>
+The string of text passed to your callback function should be copied
+elsewhere (using strdup() if necessary) because it is internal to the
+widget.  The string passed to your callback function should <i>never</i> be
+modified directly.  Also, do not just store the value of the pointer
+in some global variable.  The memory pointed to by the string is
+private to the widget and should be copied if you want to preserve it. 
+<p>
+SEE ALSO : 
+<a href="string_entry.html#fSSE"> SetStringEntry() </a>, 
+<a href="string_entry.html#fGSE"> GetStringEntry() </a>, 
+<a href="misc.html#fSWP">         SetWidgetPos() </a>,
+<a href="font.html#fGWF">         GetWidgetFont() </a>, 
+<a href="font.html#fTW">          TextWidth() </a>, 
+<a href="font.html#fSWF">         SetWidgetFont() </a>,
+<a href="misc.html#fSFC">         SetFgColor() </a>, 
+<a href="misc.html#fSBC">         SetBgColor() </a>, 
+<a href="misc.html#fSBC2">        SetBorderColor() </a> 
+<p>
+<hr>
+<a name="fSSE"> <b>
+void  SetStringEntry(Widget w, char *new_text);
+</b> </a>
+<p>
+This function allows you to change the string of text displayed in a
+string entry widget.
+<p>
+The first argument is the widget in which you would like to change the
+string (this widget should be a string entry widget).  The second
+argument is a pointer to the new text you would like displayed in the
+string entry area.
+<p>
+After calling this function, the new text is displayed in the string
+entry area and any old strings are gone.
+<p>
+SEE ALSO : 
+<a href="string_entry.html#fGSE"> GetStringEntry() </a>, 
+<a href="string_entry.html#fMSE"> MakeStringEntry() </a>, 
+<hr>
+<p>
+<a name="fGSE"> <b>
+char *GetStringEntry(Widget w)
+</b> </a>
+<p>
+This function lets you retrieve the text a user entered in a string
+widget.  The widget argument, w, should be a string entry widget.
+<p>
+The return value of this function is a char pointer to a
+null-terminated string that is the contents of the string entry
+widget.  This pointer is valid until the next time you call
+<a href="string_entry.html#fGSE"> GetStringEntry() </a> or the string widget callback is called.  Do not save
+the pointer returned by this function as it points to widget internal
+data.  You should make a copy of the string with strdup() if you want
+to save the value.
+<p>
+If there is a problem, the function returns NULL.
+<p>
+NOTE: You should not free the string returned to you by this function.
+      If you need to modify the string or otherwise use, you should
+      make a copy with strdup() or some other method.
+<p>
+SEE ALSO : 
+<a href="string_entry.html#fSSE"> SetStringEntry() </a>,
+<a href="string_entry.html#fMSE"> MakeStringEntry() </a>, 

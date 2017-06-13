@@ -1,0 +1,113 @@
+<title> List </title>
+
+<ul>
+ <li> <a href="#list"> List </a>
+ <li> <a href="list.html#fMSL">  MakeScrollList </a>
+ <li> <a href="list.html#fGCLI"> GetCurrentListItem </a>
+ <li> <a href="list.html#fCSL">  ChangeScrollList </a>
+ <li> <a href="list.html#fSCLI"> SetCurrentListItem </a>
+</ul>
+<hr>
+<p>
+<h2> <a name="list"> List </a> </h2>
+<p>
+A scroll list is a scrollable list of items organized in a veritical
+fashion.  The user can scroll through the list of items using the
+mouse and select individual items in the list of available choices.
+<hr>
+<p>
+<a name="fMSL"> <b>
+Widget MakeScrollList(char **item_list, int width, int height,
+		      ListCB func, void *data);
+</b> </a>
+<p>
+This function makes a scrollable list of items from which a user can
+select individual items.  The list contains strings of text, pointed
+to by the table, item_list.  The list, item_list, MUST contain a NULL
+entry as its last element (this is not optional). The area given to
+display the list is width and height pixels large.  If the entire list
+will not fit, scrollbars appear that will let the user easily scroll
+through the list.
+<p>
+The callback function, func, should expect to be called with a
+Widget argument, the string of text the user clicked on, the string's
+index in your table, and whatever user data pointer you gave at
+widget creation time.  The callback should be declared as follows:
+<p>
+<pre>
+   void func(Widget w, char *str, int index, void *data)
+   {
+   }
+</pre>
+<p>
+The list of strings passed in to 
+<a href="list.html#fMSL">         MakeScrollList() </a> 
+must not be free()'d
+or otherwise deallocated for the entire lifetime of the widget (or
+until the list of strings is changed with 
+<a href="list.html#fCSL">         ChangeScrollList() </a>).  
+<p>
+SEE ALSO: 
+<a href="list.html#fGCLI">        GetCurrentListItem() </a>, 
+<a href="list.html#fCSL">         ChangeScrollList() </a>,
+<a href="list.html#fSCLI">        SetCurrentListItem() </a>, 
+<a href="misc.html#fSFC">         SetFgColor() </a>, 
+<a href="misc.html#fSBC">         SetBgColor() </a>,
+<a href="font.html#fSWF">         SetWidgetFont() </a> 
+<hr>
+<p>
+<a name="fGCLI"> <b>
+int   GetCurrentListItem(Widget w);
+</b> </a>
+<p>
+This function returns the index of the currently selected item in the
+list widget `w'.  The index value returned is an index into the table
+displayed by the list (specified when the widget was created or with
+<a href="list.html#fCSL">         ChangeScrollList() </a>).
+<p>
+If no item is selected in the list widget, this routine will return
+a -1.
+<p>
+SEE ALSO: 
+<a href="list.html#fCSL">         ChangeScrollList() </a>, 
+<a href="list.html#fSCLI">        SetCurrentListItem() </a>, 
+<a href="list.html#fMSL">         MakeScrollList() </a> 
+<hr>
+<p>
+<a name="fCSL"> <b>
+void  ChangeScrollList(Widget w, char **new_list);
+</b> </a>
+<p>
+This function changes the list of strings displayed by the list
+widget `w'.  The new list of items is taken from the argument
+`new_list'.  After this function is called, the old list can be
+free()'d.  Of course you can not free the new_list until the
+application is done or you change the list again.
+<p>
+You must remember to make the last entry of the new_list be NULL. This
+is very important.
+<p>
+SEE ALSO: 
+<a href="list.html#fGCLI">        GetCurrentListItem() </a>, 
+<a href="list.html#fSCLI">        SetCurrentListItem() </a>, 
+<a href="list.html#fMSL">         MakeScrollList() </a> 
+<hr>
+<p>
+<a name="fSCLI"> <b>
+void  SetCurrentListItem(Widget w, int list_index);
+</b> </a>
+<p>
+This function causes the item with index, `list_index', to be
+highlighted in the list widget `w'.  You must make sure that
+list_index is a valid index into the currently displayed list, results
+are undefined otherwise. 
+<p>
+After calling this function, the item with the index `list_index' is
+highlighted in the list widget.
+<p>
+SEE ALSO: 
+<a href="list.html#fGCLI">        GetCurrentListItem() </a>, 
+<a href="list.html#fCSL">         ChangeScrollList() </a>, 
+<a href="list.html#fMSL">         MakeScrollList() </a>
+
+

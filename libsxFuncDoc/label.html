@@ -1,0 +1,67 @@
+<title> Labels </title>
+
+<h2> <a name="labels"> Labels </a> </h2>
+<p>
+A label widget is a widget that displays some text or bitmap but cannot 
+be clicked on or interacted with by the user.  In addition to "simple"
+label widgets, other widgets such as buttons or menus can as well 
+carry labels. Generally a label is for informational purposes, such as 
+saying what the program title is, or what the widget is supposed to be
+used for. Some widgets carry predefined labels; the list of predefined 
+labels is:
+<p>
+char *SX_Dialog_Label[] = {"Yes", "Cancel", "No", "Okay", "Cancel", "Retry" };
+<p>
+The pointers to these labels can be reassigned to other string pointers, so 
+as (e.g.) to provide translations into other languages.
+<hr>
+<p>
+<a name="fML"> <b>
+Widget MakeLabel(char *txt);
+</b> </a>
+<p>
+This function creates a label that contains the text in the character
+string pointed to by "txt".  The text will simply be displayed, with
+no fancy borders or special highlighting.  If the text contains new
+line characters, they will be interpreted properly.
+<p>
+If the argument txt is NULL, then no label will be set for the widget.
+This is convienent if you plan to put a bitmap on this widget with the
+<a href="misc.html#fSWB">         SetWidgetBitmap() </a> 
+function.
+<p>
+This widget is useful for displaying a piece of textual information
+like a filename or user name.
+<p>
+If this routine fails, a NULL is returned.
+<p>
+SEE ALSO :  
+<a href="misc.html#fSWP">         SetWidgetPos() </a>, 
+<a href="misc.html#fSWB">         SetWidgetBitmap() </a>, 
+<a href="label.html#fSL">	SetLabel()</a>, 
+<a href="font.html#fSWF">         SetWidgetFont() </a>,
+<a href="misc.html#fSFC">         SetFgColor() </a>, 
+<a href="misc.html#fSBC">         SetBgColor() </a>, 
+<a href="misc.html#fSBC2">        SetBorderColor() </a>
+<hr>
+<p>
+<a name="fSL"> <b>
+void SetLabel(Widget w, char *txt);
+</b> </a>
+<p>
+This function sets the widget's text to the character string pointed to
+by "txt".  The widget makes a private copy, so the "txt" pointer may be
+freed afterwards.
+<p>
+The new string may be truncated to the right if it is longer than the
+original.  The simplest workaround is to pad the initial string with
+blanks at creation time.
+<p>
+This function also works with widgets created by MakeButton()
+and MakeToggle().
+<p>
+SEE ALSO :  
+<a href="label.html#fML">         MakeLabel() </a>, 
+<a href="button.html#fMB">        MakeButton() </a>, 
+<a href="toggle.html#fMT">        MakeToggle() </a>, 
+<a href="font.html#fSWF">         SetWidgetFont() </a>
